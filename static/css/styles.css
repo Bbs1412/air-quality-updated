@@ -1,0 +1,494 @@
+* {
+    box-sizing: border-box;
+    align-items: center;
+}
+
+body {
+    background-color: #151e21;
+    /* Dark theme background */
+    font-family: "Arial", sans-serif;
+    color: #7dd8e4;
+    text-align: center;
+}
+
+/* .page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #151e21;
+} */
+
+.page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    width: 80%;
+    margin-left: 10%;
+}
+
+.grid_container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    align-content: center;
+}
+
+#page_title {
+    font-size: 3rem;
+    margin-top: 4rem;
+    margin-bottom: 6rem;
+}
+
+#aligner {
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+}
+
+.data {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(3, minmax(auto, 1fr));
+    gap: 2rem;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4rem;
+    /* background-color: #4d4d4d; */
+    background-color: #263237;
+    border-radius: 20px;
+    box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+    min-width: 22rem;
+}
+
+.item:hover {
+    transform: translateY(-10px);
+}
+
+.item h2 {
+    font-size: 2.5rem;
+}
+
+.item p {
+    font-size: 2.5rem;
+    color: #fff;
+}
+
+.item .big-font {
+    font-size: 2.5rem;
+}
+
+.name {
+    color: #151e21;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.graph {
+    text-align: center;
+}
+
+.hname {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+p {
+    color: #7dd8e4;
+    font-size: 20px;
+}
+
+
+#gap {
+    height: 4rem;
+}
+
+.plotly {
+    align-items: center;
+    margin-left: 0;
+}
+
+.plot2d {
+    width: 75%;
+    text-align: left;
+    min-height: 40rem;
+}
+
+.plot3d {
+    width: 75%;
+    min-height: 50rem;
+    background-color: black;
+}
+
+#bottom {
+    width: 100%;
+}
+
+#copyrights {
+    color: chartreuse;
+    font-size: 1.25rem;
+}
+
+#last_updated {
+    color: grey;
+    font-size: 1.25rem;
+    text-align: right;
+    cursor: pointer;
+}
+
+#ideal_mode {
+    color: #FB9039;
+    font-size: 1.25rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+#last_updated:active {
+    color: red;
+}
+
+#ideal_mode:active {
+    color: red;
+}
+
+#in_one_line {
+    display: flex;
+    text-align: right;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+}
+
+#errBox {
+    min-height: 75vh;
+    max-height: 90vh;
+    width: 80%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow-y: auto;
+    border: solid rgb(89, 89, 89) 0.1rem;
+    background-color: #0E0E0E;
+    border-radius: 2rem;
+    /* padding: 1rem; */
+    z-index: 999;
+    display: none;
+    /* display: flex; */
+    flex-direction: column;
+}
+
+#errBoxContent {
+    height: 100%;
+    width: 90%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* justify-content: space-between; */
+    justify-content: space-around;
+    color: white;
+    margin: 0% 5%;
+    /* margin-right: 5%; */
+}
+
+#errTitle {
+    margin: 0%;
+    padding: 0%;
+    width: 100%;
+}
+
+#errTitle>#main {
+    color: #FAD500;
+    font-size: 4rem;
+    margin: 0% 0%;
+}
+
+#errWarning {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* height: 25rem; */
+    width: 100%;
+}
+
+#warning_title {
+    display: flex;
+    flex-direction: row;
+    width: 60%;
+    height: 100%;
+    justify-content: center;
+    gap: 3rem;
+}
+
+#warning_icon {
+    width: 8rem;
+}
+
+#warning_title_text {
+    font-size: 3rem;
+    color: rgba(255, 0, 0, 1);
+}
+
+#warning_detail {
+    color: cyan;
+    font-size: 2rem;
+    width: 60%;
+}
+
+#contacts {
+    bottom: 0%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+#contacts>div {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+}
+
+#contacts p {
+    color: white;
+    align-items: center;
+    line-height: 0.5rem;
+    font-size: 1.75rem;
+    margin-right: 1rem;
+}
+
+.em_icon {
+    width: 4rem;
+    transform: scaleX(-1);
+    margin-left: 1rem;
+}
+
+#contacts>div:hover,
+#contacts>div:active {
+    transform: scale(1.5);
+    background-color: #272727;
+    border-radius: 2rem;
+    /* transform: scaleX(-1); */
+}
+
+#close_btn {
+    position: fixed;
+    top: 2%;
+    right: 1%;
+
+    display: flex;
+    background-color: #303030;
+    /* background-color: pink; */
+    height: 3rem;
+    width: 3rem;
+    border-radius: 20%;
+    color: white;
+    font-size: 1.75rem;
+    align-items: center;
+    justify-content: center;
+}
+
+#close_btn:hover,
+#close_btn:active {
+    background-color: red;
+}
+
+
+/* Media query for tab etc */
+@media only screen and (max-width: 1150px) {
+    .data {
+        align-items: center;
+        display: grid;
+        grid-template-columns: repeat(1, minmax(100%, 1fr));
+    }
+
+    .item {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .plot2d {
+        width: 80%;
+        min-width: unset;
+        min-height: 25rem;
+    }
+
+    .plot3d {
+        width: 80%;
+        min-width: unset;
+        min-height: 25rem;
+        background-color: black;
+    }
+
+}
+
+/* Media query for phones */
+@media only screen and (max-width: 800px) {
+    .plot2d {
+        width: 100%;
+        min-width: unset;
+        min-height: 20rem;
+    }
+
+    .plot3d {
+        width: 100%;
+        min-width: unset;
+        min-height: 25rem;
+        background-color: black;
+    }
+
+    #copyrights {
+        font-size: 0.75rem;
+    }
+
+    #last_updated {
+        font-size: 0.75rem;
+    }
+
+    #ideal_mode {
+        font-size: 0.75rem;
+    }
+}
+
+
+@media only screen and (max-width: 655px){
+    #errTitle>#main {
+        padding: 1rem 1rem;
+        font-size: 2.5rem;
+    }
+
+    #warning_icon {
+        margin-left: 1.5rem;
+        width: 4rem;
+    }
+
+    #warning_title {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        gap: 0.1rem;
+    }
+
+    #warning_title_text {
+        font-size: 2rem;
+    }
+
+    #warning_detail {
+        font-size: 1.5rem;
+        width: 95%;
+    }
+
+    #contacts {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+    }
+
+    #contacts>div {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 0.2rem;
+    }
+
+    #contacts p {
+        line-height: 0.5rem;
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+    }
+
+    .em_icon {
+        width: 2.75rem;
+    }
+
+    #contacts>div:hover,
+    #contacts>div:active {
+        transform: scale(1.25);
+    }
+
+    #close_btn {
+        right: 1%;
+        top: 1.5%;
+        height: 2rem;
+        width: 2rem;
+        border-radius: 20%;
+        font-size: 1.75rem;
+    }
+}
+
+
+/*
+een and (max-width: 1150px) {
+    .data {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .item {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .plot2d {
+        width: 100%;
+        min-width: unset;
+        min-height: 25rem;
+    }
+
+    .plot3d {
+        width: 100%;
+        min-width: unset;
+        min-height: 25rem;
+        background-color: black;
+    }
+
+    .data {
+        display: grid;
+        width: 40%;
+        grid-template-columns: repeat(1, minmax(100%, 1fr));
+    }
+}
+
+@media only screen and (max-width: 1080px) {
+    .data {
+        display: grid;
+        width: 40%;
+        grid-template-columns: repeat(1, minmax(100%, 1fr));
+    }
+
+}
+
+@media only screen and (max-width: 850px) {
+    .data {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(100%, 1fr));
+    }
+
+}
+
+@media only screen and (min-width: 601px) {
+    .plot2d {
+        width: 75%;
+    }
+}
+*/
