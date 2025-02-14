@@ -5,18 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather App</title>
-    <!-- <link rel="icon" type="image/png" href="static/img/sun.png"> -->
     <link rel="icon" type="image/png" href="static/img/rainy-day.png">
 
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="static/css/styles.css">
 
-    <!-- Open Graph meta tags -->
     <meta property="og:title" content="Air Quality Monitoring System">
     <meta property="og:description" content="Website to Monitor and plot the readings of collected data from backend.">
-    <!--   This image appears while sharing the link on WA etc.  -->
-    <!-- <meta property="og:image"
-    content="https://cdn.jsdelivr.net/gh/Bbs1412/air-quality-monitoring-system/assets/rainy-day.png"> -->
     <meta property="og:image" content="static/img/rainy-day.png">
     <meta property="og:url" content="https://airqualitybbs.vercel.app/">
     <meta property="og:type" content="website">
@@ -38,9 +33,6 @@
 
                     <div class="item air-quality">
                         <h2>Air Quality</h2>
-
-                        <!-- <div class="air-quality-slider></div> -->
-                        <!-- <p class=" big-font">${airQuality} ppm</p> -->
                         <p class="big-font" id="dash_aq">500</p>
                     </div>
 
@@ -56,37 +48,36 @@
         </div>
 
         <!-- <div id="delete_later">
-      <button onclick="activate_error_box(true, false)">Fire</button>
-      <button onclick="activate_error_box(false, true)">Gas</button>
-      <button onclick="activate_error_box(true, true)">Both</button>
-    </div> -->
+            <button onclick="activate_error_box(true, false)">Fire</button>
+            <button onclick="activate_error_box(false, true)">Gas</button>
+            <button onclick="activate_error_box(true, true)">Both</button>
+        </div> -->
 
         <br />
-        <p> Temperature Graph</p>
         <div class="hname">
-            <div id="temp" class="plot2d"></div>
+            <p> Temperature Graph</p>
+            <div id="plot2_temperature" class="plot2d"></div>
             <div id="gap"></div>
 
             <p> Humidity Graph</p>
-            <div id="hum" class="plot2d"></div>
+            <div id="plot2_humidity" class="plot2d"></div>
             <div id="gap"></div>
 
             <p> Air Quality Graph</p>
-            <div id="airquality" class="plot2d"></div>
+            <div id="plot2_air_quality" class="plot2d"></div>
             <div id="gap"></div>
 
             <p> Feels Like Temperature Graph</p>
-            <div id="feel" class="plot2d"></div>
+            <div id="plot2_feels_like" class="plot2d"></div>
             <div id="gap"></div>
 
             <p> <label> Temperature and Humidity vs Temperature Feel </label> </p>
-            <div id="Div" class="plot3d"></div>
+            <div id="plot3_temp_hum_feel" class="plot3d"></div>
             <div id="gap"></div>
 
             <p> <label> Temperature Feel and Humidity Vs Air Quality </label> </p>
-            <div id="mydiv" class="plot3d"></div>
+            <div id="plot3_feel_hum_aq" class="plot3d"></div>
             <div id="gap"></div>
-
         </div>
 
         <div id="bottom">
@@ -99,11 +90,10 @@
 
             <p id="copyrights">
                 &COPY;
-                <!-- <span id="prof_basil"> Basil Skaria</span>, -->
                 <span id="prof_bhushan"> Bhushan Songire &#128279;</span>,
                 <span id="prof_ujjawal"> Ujjawal Kumar</span>,
                 <span id="prof_vedant"> Vedant Choudhari,</span>
-                <span id="copy_time"> (May 2024) </span>
+                <span id="copy_time"> (Feb 2025) </span>
             </p>
         </div>
 
@@ -113,7 +103,6 @@
         <div id="errBoxContent">
 
             <div id="errTitle">
-                <!-- <h2 id="main">Emergency Warning System</h2> -->
                 <h2 id="main">Emergency Alert System</h2>
             </div>
 
@@ -130,7 +119,6 @@
 
             <div id="contacts">
                 <div class="em_contacts">
-                    <!-- <img src="static/img/police-car.png" alt="Police" id="em_icon"> -->
                     <img src="static/img/police.png" alt="Police" class="em_icon">
                     <p id="police">112</p>
                 </div>
@@ -141,7 +129,6 @@
                 </div>
 
                 <div class="em_contact">
-                    <!-- <img src="static/img/firefighter.png" alt="Fire-Brigade" id="em_icon"> -->
                     <img src="static/img/firetruck.png" alt="Fire-Brigade" class="em_icon">
                     <p id="fire_brigade">101</p>
                 </div>
@@ -151,148 +138,119 @@
         <div id="close_btn" onclick="activate_error_box(false, false)">X</div>
     </div>
 
-    <!-- Main renderer -->
-    <script src="static/js/dashboard.js"></script>
 
-    <!-- 2D plots 
-    <script src="static/js/plot_humidity.js"> </script>
-    <script src="static/js/plot_feels_like.js"> </script>
-    <script src="static/js/plot_air_quality.js"> </script>
-    <script src="static/js/plot_temperature.js"></script>
-    -->
+    <script src="static/js/script.js"></script>
+    <script src="static/js/plot_2d.js"></script>
+    <script src="static/js/plot_3d.js"></script> 
 
-    <!-- 3D plots 
-    <script src="static/js/plotly_AQHum.js"> </script>
-    <script src="static/js/plotly_HumTemp.js"></script>
-    -->
-
-    <!-- SOS -->
-    <script src="static/js/trigger_error.js"></script>
-
-
+    <!-- initially plotting things: 
     <script>
         var bs_obj_global;
         var data_fetch_status = false;
         var get_firebase_node;
         var ideal_mode;
     </script>
-
-    <!-- base script -->
-    <script>
-        const prof_bs = document.getElementById('prof_bhushan');
-
-        prof_bs.style.cursor = 'pointer';
-        prof_bs.title = "Click to visit my profile";
-
-        prof_bs.addEventListener('click', () => {
-            window.open('https://www.linkedin.com/in/bhushan-songire', '_blank');
-        })
-
-    </script>
-
-    <!-- initially plotting things: 
     <script type="module">
         import { bs_obj } from "static/js/initial_readings_2.js";
-        
+
         // Update the readings in dashboard boxes:
         updateReadings(
             bs_obj.bs_temp[bs_obj.bs_temp.length - 1],
             bs_obj.bs_hum[bs_obj.bs_hum.length - 1],
             bs_obj.bs_mq135[bs_obj.bs_mq135.length - 1],
-            );
-            
+        );
+
+        plot2_temperature(bs_obj.bs_temp);
+        plot2_humidity(bs_obj.bs_hum);
+        plot2_air_quality(bs_obj.bs_mq135);
+        plot2_feels_like(bs_obj.bs_feel);
+        plot3_hum_temp(bs_obj.bs_temp, bs_obj.bs_hum, bs_obj.bs_feel);
+        plot3_aq_hum(bs_obj.bs_feel, bs_obj.bs_hum, bs_obj.bs_mq135);
+
+        bs_obj_global = bs_obj;
+    </script>
+    -->
+
+    <!-- // Getting real time data and plotting that:
+    <script type="module">
+        import { login, get_data, var_random } from './fb_main.js';
+
+        console.log("Imported test_variable: ", var_random);
+
+        async function get_firebase_node(ideal_mode = false) {
+            // 'ideal_mode' is default 'FALSE' param, unless the fn is called with 'TRUE' as parameter
+
+            // get real time branch data if not in ideal mode
+            // else, get data from ideal mode branch
+            var bs_obj = await get_data(ideal_mode);
+            bs_obj_global = bs_obj;
+
             plot2_temperature(bs_obj.bs_temp);
             plot2_humidity(bs_obj.bs_hum);
             plot2_air_quality(bs_obj.bs_mq135);
             plot2_feels_like(bs_obj.bs_feel);
             plot3_hum_temp(bs_obj.bs_temp, bs_obj.bs_hum, bs_obj.bs_feel);
             plot3_aq_hum(bs_obj.bs_feel, bs_obj.bs_hum, bs_obj.bs_mq135);
-            
-            bs_obj_global = bs_obj;
-        </script>
-        -->
 
-    <!-- Getting real time data and plotting that: -->
-    <!-- 
-  <script type="module">
-    import { login, get_data, var_random } from './fb_main.js';
+            updateReadings(
+                bs_obj.bs_temp[bs_obj.bs_temp.length - 1],
+                bs_obj.bs_hum[bs_obj.bs_hum.length - 1],
+                bs_obj.bs_mq135[bs_obj.bs_mq135.length - 1],
+            );
 
-    console.log("Imported test_variable: ", var_random);
-
-    async function get_firebase_node(ideal_mode = false) {
-      // 'ideal_mode' is default 'FALSE' param, unless the fn is called with 'TRUE' as parameter
-
-      // get real time branch data if not in ideal mode
-      // else, get data from ideal mode branch
-      var bs_obj = await get_data(ideal_mode);
-      bs_obj_global = bs_obj;
-
-      plot2_temperature(bs_obj.bs_temp);
-      plot2_humidity(bs_obj.bs_hum);
-      plot2_air_quality(bs_obj.bs_mq135);
-      plot2_feels_like(bs_obj.bs_feel);
-      plot3_hum_temp(bs_obj.bs_temp, bs_obj.bs_hum, bs_obj.bs_feel);
-      plot3_aq_hum(bs_obj.bs_feel, bs_obj.bs_hum, bs_obj.bs_mq135);
-
-      updateReadings(
-        bs_obj.bs_temp[bs_obj.bs_temp.length - 1],
-        bs_obj.bs_hum[bs_obj.bs_hum.length - 1],
-        bs_obj.bs_mq135[bs_obj.bs_mq135.length - 1],
-      );
-
-      activate_error_box(bs_obj.bs_fire, bs_obj.bs_gas);
-    }
+            activate_error_box(bs_obj.bs_fire, bs_obj.bs_gas);
+        }
 
 
-    // var for managing the setInterval for automatic calls of fetch data
-    var interval_id;
-    const fetch_interval = 15 * 1000;     // 15 sec
+        // var for managing the setInterval for automatic calls of fetch data
+        var interval_id;
+        const fetch_interval = 15 * 1000;     // 15 sec
 
-    function toggleFetchingData() {
-      if (data_fetch_status) {
-        clearInterval(interval_id);
-        console.log('Stopped fetching data.')
-        stamp.style.color = 'grey';
-        stamp.title = "Not fetching the live data from server!"
-      } else {
-        interval_id = setInterval(get_firebase_node, fetch_interval);
-        console.log('Resumed fetching data.')
-        stamp.style.color = '#FB9039';
-        stamp.title = "Fetching the live data from server!"
-      }
-      data_fetch_status = !data_fetch_status; // Toggle data_fetch_status
-    }
+        function toggleFetchingData() {
+            if (data_fetch_status) {
+                clearInterval(interval_id);
+                console.log('Stopped fetching data.')
+                stamp.style.color = 'grey';
+                stamp.title = "Not fetching the live data from server!"
+            } else {
+                interval_id = setInterval(get_firebase_node, fetch_interval);
+                console.log('Resumed fetching data.')
+                stamp.style.color = '#FB9039';
+                stamp.title = "Fetching the live data from server!"
+            }
+            data_fetch_status = !data_fetch_status; // Toggle data_fetch_status
+        }
 
-    // Initialize data fetching
-    await login(123);
-    await get_firebase_node(ideal_mode = false);
+        // Initialize data fetching
+        await login(123);
+        await get_firebase_node(ideal_mode = false);
 
-    // 'last updated' as event listener
-    var stamp = document.getElementById("last_updated");
-    stamp.addEventListener('click', toggleFetchingData);
+        // 'last updated' as event listener
+        var stamp = document.getElementById("last_updated");
+        stamp.addEventListener('click', toggleFetchingData);
 
-    // 'ideal mode' as event listener
-    const ideal_mode_btn = document.getElementById('ideal_mode');
-    ideal_mode_btn.addEventListener('click', () => {
-      console.log("Loading 24 hour data...");
+        // 'ideal mode' as event listener
+        const ideal_mode_btn = document.getElementById('ideal_mode');
+        ideal_mode_btn.addEventListener('click', () => {
+            console.log("Loading 24 hour data...");
 
-      // stop auto fetch of data (with some fix interval) if its already ON
-      if (data_fetch_status) {
-        clearInterval(interval_id);
-        stamp.style.color = 'grey';
-        stamp.title = "Not fetching the live data from server!";
-        data_fetch_status = false;
-      }
+            // stop auto fetch of data (with some fix interval) if its already ON
+            if (data_fetch_status) {
+                clearInterval(interval_id);
+                stamp.style.color = 'grey';
+                stamp.title = "Not fetching the live data from server!";
+                data_fetch_status = false;
+            }
 
-      get_firebase_node(ideal_mode = true);
-      stamp.style.color = 'grey';
-    }); 
-    // if it is called like this below, it will always be called instead of onClick event
-    // because we need to pass the pointer_of_fn and not fn call()
-    // ideal_mode_btn.addEventListener('click', get_firebase_node(ideal_mode=true));
-    
-  </script>
-  -->
+            get_firebase_node(ideal_mode = true);
+            stamp.style.color = 'grey';
+        });
+        // if it is called like this below, it will always be called instead of onClick event
+        // because we need to pass the pointer_of_fn and not fn call()
+        // ideal_mode_btn.addEventListener('click', get_firebase_node(ideal_mode=true));
+
+    </script>
+    -->
 
 </body>
 
