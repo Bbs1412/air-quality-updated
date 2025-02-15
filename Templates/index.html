@@ -15,243 +15,165 @@
     <meta property="og:image" content="static/img/rainy-day.png">
     <meta property="og:url" content="https://airqualitybbs.vercel.app/">
     <meta property="og:type" content="website">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div id="main">
+    <div class="dashboard">
+        <header>
+            <h1>Environmental Analytics</h1>
+            <button id="live-monitor-btn" class="status-badge" data-modal-target="#live-auth-modal">
+                Live Monitoring
+            </button>
+        </header>
 
-        <div id="app">
-            <div class='grid_container'>
-                <h1 id="page_title">Environment Monitoring</h1>
-
-                <div class="data">
-
-                    <div class="item temperature">
-                        <h2>Temperature</h2>
-                        <p class="big-font" id="dash_temp">50 °C</p>
-                    </div>
-
-                    <div class="item air-quality">
-                        <h2>Air Quality</h2>
-                        <p class="big-font" id="dash_aq">500</p>
-                    </div>
-
-                    <div class="item humidity">
-                        <h2>Humidity</h2>
-                        <p class="big-font" id="dash_hum">50 %</p>
-                    </div>
-
+        <!-- Live Data Boxes: -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="card-icon">
+                    <img src="static/img/sun.png" alt="Temperature">
                 </div>
+                <div class="card-content">
+                    <h3>Temperature</h3>
+                    <p class="metric-value" id="dash_temp">--°C</p>
+                </div>
+            </div>
 
-                <div id="aligner"></div>
+            <div class="metric-card">
+                <div class="card-icon">
+                    <img src="static/img/clear-sky.png" alt="Air Quality">
+                </div>
+                <div class="card-content">
+                    <h3>Air Quality</h3>
+                    <p class="metric-value" id="dash_aq">---</p>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="card-icon">
+                    <img src="static/img/cloudy.png" alt="Humidity">
+                </div>
+                <div class="card-content">
+                    <h3>Humidity</h3>
+                    <p class="metric-value" id="dash_hum">--%</p>
+                </div>
             </div>
         </div>
 
-        <!-- <div id="delete_later">
-            <button onclick="activate_error_box(true, false)">Fire</button>
-            <button onclick="activate_error_box(false, true)">Gas</button>
-            <button onclick="activate_error_box(true, true)">Both</button>
-        </div> -->
+        <div class="graphs-container">
 
-        <br />
-        <div class="hname">
-            <p> Temperature Graph</p>
-            <div id="plot2_temperature" class="plot2d"></div>
-            <div id="gap"></div>
-
-            <p> Humidity Graph</p>
-            <div id="plot2_humidity" class="plot2d"></div>
-            <div id="gap"></div>
-
-            <p> Air Quality Graph</p>
-            <div id="plot2_air_quality" class="plot2d"></div>
-            <div id="gap"></div>
-
-            <p> Feels Like Temperature Graph</p>
-            <div id="plot2_feels_like" class="plot2d"></div>
-            <div id="gap"></div>
-
-            <p> <label> Temperature and Humidity vs Temperature Feel </label> </p>
-            <div id="plot3_temp_hum_feel" class="plot3d"></div>
-            <div id="gap"></div>
-
-            <p> <label> Temperature Feel and Humidity Vs Air Quality </label> </p>
-            <div id="plot3_feel_hum_aq" class="plot3d"></div>
-            <div id="gap"></div>
-        </div>
-
-        <div id="bottom">
-            <div id="in_one_line">
-                <p id="last_updated" title="Click to stop fetching data."></p>
-                <p id="ideal_mode" title="Click here to get 24 hour pre-uploaded data.">Load 24 hour data</p>
+            <!-- 2D: Temperature vs Time -->
+            <div class="graph-section">
+                <div class="graph-header">
+                    <h3>Temperature Trends</h3>
+                    <div class="time-controls">
+                        <button class="time-btn active">24H</button>
+                        <button class="time-btn">7D</button>
+                        <button class="time-btn">30D</button>
+                    </div>
+                </div>
+                <div id="plot2_temperature" class="plot2d"></div>
             </div>
 
-            <hr>
+            <!-- 2D: Humidity vs Time -->
+            <div class="graph-section">
+                <div class="graph-header">
+                    <h3>Humidity Analysis</h3>
+                    <div class="time-controls">
+                        <button class="time-btn active">24H</button>
+                        <button class="time-btn">7D</button>
+                        <button class="time-btn">30D</button>
+                    </div>
+                </div>
+                <div id="plot2_humidity" class="plot2d"></div>
+            </div>
 
-            <p id="copyrights">
-                &COPY;
-                <span id="prof_bhushan"> Bhushan Songire &#128279;</span>,
-                <span id="prof_ujjawal"> Ujjawal Kumar</span>,
-                <span id="prof_vedant"> Vedant Choudhari,</span>
-                <span id="copy_time"> (Feb 2025) </span>
-            </p>
+            <!-- 2D: Air Quality vs Time -->
+            <div class="graph-section">
+                <div class="graph-header">
+                    <h3>Air Quality Metrics</h3>
+                    <div class="time-controls">
+                        <button class="time-btn active">24H</button>
+                        <button class="time-btn">7D</button>
+                        <button class="time-btn">30D</button>
+                    </div>
+                </div>
+                <div id="plot2_air_quality" class="plot2d"></div>
+            </div>
+
+            <!-- 3D: Temperature vs Humidity vs Feel -->
+            <div class="graph-section">
+                <div class="graph-header">
+                    <h3>Environmental Correlation</h3>
+                    <div class="time-controls">
+                        <button class="time-btn active">24H</button>
+                        <button class="time-btn">7D</button>
+                        <button class="time-btn">30D</button>
+                    </div>
+                </div>
+                <div id="plot3_temp_hum_feel" class="plot3d"></div>
+            </div>
+
+            <!-- 3D: Feel vs Humidity vs Air Quality -->
+            <div class="graph-section">
+                <div class="graph-header">
+                    <h3>Feels Like</h3>
+                    <div class="time-controls">
+                        <button class="time-btn active">24H</button>
+                        <button class="time-btn">7D</button>
+                        <button class="time-btn">30D</button>
+                    </div>
+                </div>
+                <div id="plot3_feel_hum_aq" class="plot3d"></div>
+            </div>
+
         </div>
 
+        <footer>
+            <div class="footer-content">
+                <p class="copyright"> ©
+                    <a href="https://www.linkedin.com/in/bhushan-songire/" target="_blank" class="author-link">Bhushan
+                        Songire</a>, Air Quality Monitoring System, Feb 2025
+                </p>
+
+                <p id="last_updated">Data Last Updated - --:--:-- --</p>
+            </div>
+        </footer>
     </div>
 
-    <div id="errBox">
-        <div id="errBoxContent">
-
-            <div id="errTitle">
-                <h2 id="main">Emergency Alert System</h2>
-            </div>
-
-            <div id="errWarning">
-
-                <div id="warning_title">
-                    <img id="warning_icon" src="static/img/rainy-day.png">
-                    <h3 id="warning_title_text"></h3>
-                </div>
-
-                <span id="warning_detail"></span>
-
-            </div>
-
-            <div id="contacts">
-                <div class="em_contacts">
-                    <img src="static/img/police.png" alt="Police" class="em_icon">
-                    <p id="police">112</p>
-                </div>
-
-                <div class="em_contact">
-                    <img src="static/img/ambulance.png" alt="Ambulance" class="em_icon">
-                    <p id="ambulance">102</p>
-                </div>
-
-                <div class="em_contact">
-                    <img src="static/img/firetruck.png" alt="Fire-Brigade" class="em_icon">
-                    <p id="fire_brigade">101</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="close_btn" onclick="activate_error_box(false, false)">X</div>
+    <div id="alert-modal" class="hidden">
+        <!-- Alert content will be dynamically inserted -->
     </div>
 
+    <!-- Add the authentication modal, for real time data fetch -->
+    <div id="live-auth-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Authentication Required</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="auth-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="auth-submit">Enable Live Monitoring</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script src="static/js/script.js"></script>
     <script src="static/js/plot_2d.js"></script>
-    <script src="static/js/plot_3d.js"></script> 
-
-    <!-- initially plotting things: 
-    <script>
-        var bs_obj_global;
-        var data_fetch_status = false;
-        var get_firebase_node;
-        var ideal_mode;
-    </script>
-    <script type="module">
-        import { bs_obj } from "static/js/initial_readings_2.js";
-
-        // Update the readings in dashboard boxes:
-        updateReadings(
-            bs_obj.bs_temp[bs_obj.bs_temp.length - 1],
-            bs_obj.bs_hum[bs_obj.bs_hum.length - 1],
-            bs_obj.bs_mq135[bs_obj.bs_mq135.length - 1],
-        );
-
-        plot2_temperature(bs_obj.bs_temp);
-        plot2_humidity(bs_obj.bs_hum);
-        plot2_air_quality(bs_obj.bs_mq135);
-        plot2_feels_like(bs_obj.bs_feel);
-        plot3_hum_temp(bs_obj.bs_temp, bs_obj.bs_hum, bs_obj.bs_feel);
-        plot3_aq_hum(bs_obj.bs_feel, bs_obj.bs_hum, bs_obj.bs_mq135);
-
-        bs_obj_global = bs_obj;
-    </script>
-    -->
-
-    <!-- // Getting real time data and plotting that:
-    <script type="module">
-        import { login, get_data, var_random } from './fb_main.js';
-
-        console.log("Imported test_variable: ", var_random);
-
-        async function get_firebase_node(ideal_mode = false) {
-            // 'ideal_mode' is default 'FALSE' param, unless the fn is called with 'TRUE' as parameter
-
-            // get real time branch data if not in ideal mode
-            // else, get data from ideal mode branch
-            var bs_obj = await get_data(ideal_mode);
-            bs_obj_global = bs_obj;
-
-            plot2_temperature(bs_obj.bs_temp);
-            plot2_humidity(bs_obj.bs_hum);
-            plot2_air_quality(bs_obj.bs_mq135);
-            plot2_feels_like(bs_obj.bs_feel);
-            plot3_hum_temp(bs_obj.bs_temp, bs_obj.bs_hum, bs_obj.bs_feel);
-            plot3_aq_hum(bs_obj.bs_feel, bs_obj.bs_hum, bs_obj.bs_mq135);
-
-            updateReadings(
-                bs_obj.bs_temp[bs_obj.bs_temp.length - 1],
-                bs_obj.bs_hum[bs_obj.bs_hum.length - 1],
-                bs_obj.bs_mq135[bs_obj.bs_mq135.length - 1],
-            );
-
-            activate_error_box(bs_obj.bs_fire, bs_obj.bs_gas);
-        }
-
-
-        // var for managing the setInterval for automatic calls of fetch data
-        var interval_id;
-        const fetch_interval = 15 * 1000;     // 15 sec
-
-        function toggleFetchingData() {
-            if (data_fetch_status) {
-                clearInterval(interval_id);
-                console.log('Stopped fetching data.')
-                stamp.style.color = 'grey';
-                stamp.title = "Not fetching the live data from server!"
-            } else {
-                interval_id = setInterval(get_firebase_node, fetch_interval);
-                console.log('Resumed fetching data.')
-                stamp.style.color = '#FB9039';
-                stamp.title = "Fetching the live data from server!"
-            }
-            data_fetch_status = !data_fetch_status; // Toggle data_fetch_status
-        }
-
-        // Initialize data fetching
-        await login(123);
-        await get_firebase_node(ideal_mode = false);
-
-        // 'last updated' as event listener
-        var stamp = document.getElementById("last_updated");
-        stamp.addEventListener('click', toggleFetchingData);
-
-        // 'ideal mode' as event listener
-        const ideal_mode_btn = document.getElementById('ideal_mode');
-        ideal_mode_btn.addEventListener('click', () => {
-            console.log("Loading 24 hour data...");
-
-            // stop auto fetch of data (with some fix interval) if its already ON
-            if (data_fetch_status) {
-                clearInterval(interval_id);
-                stamp.style.color = 'grey';
-                stamp.title = "Not fetching the live data from server!";
-                data_fetch_status = false;
-            }
-
-            get_firebase_node(ideal_mode = true);
-            stamp.style.color = 'grey';
-        });
-        // if it is called like this below, it will always be called instead of onClick event
-        // because we need to pass the pointer_of_fn and not fn call()
-        // ideal_mode_btn.addEventListener('click', get_firebase_node(ideal_mode=true));
-
-    </script>
-    -->
-
+    <script src="static/js/plot_3d.js"></script>
 </body>
 
 </html>
