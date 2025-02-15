@@ -52,7 +52,7 @@ async function fetchAndPlotData(isInitialFetch = false) {
         let data;
 
         if (isInitialFetch) {
-            const points_count = 120;
+            const points_count = 2000;
             const response = await fetch(`/get_init_data/${points_count}`);
             data = await response.json();
         }
@@ -85,23 +85,32 @@ async function fetchAndPlotData(isInitialFetch = false) {
         );
 
 
-        // 2D Plots
+        // 2D Plots (plotData2 is new, plotData is old):
+        plotData2('plot2_temperature', data.bs_temp, 'Temperature');
+        plotData2('plot2_humidity', data.bs_hum, 'Humidity');
+        plotData2('plot2_air_quality', data.bs_mq135, 'Air Quality');
+        plotData2('plot2_feels_like', data.bs_feel, 'Feels Like Temperature');
+
+        // Mix n Match:
         // plotData('plot2_temperature', data.bs_temp, 'Temperature');
-        // plotData('plot2_humidity', data.bs_hum, 'Humidity');
+        // plotData2('plot2_humidity', data.bs_hum, 'Humidity');
         // plotData('plot2_air_quality', data.bs_mq135, 'Air Quality');
-        // plotData('plot2_feels_like', data.bs_feel, 'Feels Like Temperature');
+        // plotData2('plot2_feels_like', data.bs_feel, 'Feels Like Temperature');
 
         // 3D Plots
-        // plot3D('plot3_temp_hum_feel',
-        //     data.bs_temp, data.bs_hum, data.bs_feel,
-        //     'Temperature', 'Humidity', 'Feels Like Temperature'
-        // );
+        plot3Dv2('plot3_temp_hum_feel',
+            data.bs_temp, data.bs_hum, data.bs_feel,
+            'Temperature', 'Humidity', 'Feels Like Temperature',
+            'Magma'
+        );
 
-        // plot3D('plot3_feel_hum_aq',
-        //     data.bs_feel, data.bs_hum, data.bs_mq135,
-        //     'Feels Like Temperature', 'Humidity', 'Air Quality'
-        // );
+        plot3Dv2('plot3_feel_hum_aq',
+            data.bs_feel, data.bs_hum, data.bs_mq135,
+            'Feels Like Temperature', 'Humidity', 'Air Quality',
+            'Electric'
+        );
 
+        
         // Check for emergencies
         AlertSystem.handleEmergency(data.bs_fire, data.bs_gas);
     } catch (error) {
@@ -294,10 +303,10 @@ const ChartSystem = {
         this.gaugeChart.setOptions({
             // Update the translate -30 in css to move the gauge up/down
             // The angle range (in radians)
-            angle: 0, 
+            angle: 0,
             // Make the line thicker
-            lineWidth: 0.2, 
-            radiusScale: 0.75, 
+            lineWidth: 0.2,
+            radiusScale: 0.75,
             pointer: {
                 length: 0.5,
                 strokeWidth: 0.035,
@@ -312,7 +321,7 @@ const ChartSystem = {
             generateGradient: true,
             highDpiSupport: true,
             // Color gradient
-            percentColors: [[0.0, "#48bb78"], [0.50, "#f6e05e"], [1.0, "#f56565"]], 
+            percentColors: [[0.0, "#48bb78"], [0.50, "#f6e05e"], [1.0, "#f56565"]],
             staticLabels: {
                 font: "12px Inter",
                 labels: [0, 100, 200, 300, 400, 500],
@@ -416,11 +425,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // LiveMonitoring.startLiveMonitoring();
 
     // Copyright link
-    const authorLink = document.querySelector('.author-link');
-    if (authorLink) {
-        authorLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.open('https://www.linkedin.com/in/bhushan-songire', '_blank');
-        });
-    }
+    // const authorLink = document.querySelector('.author-link');
+    // if (authorLink) {
+    //     authorLink.addEventListener('click', (e) => {
+    //         e.preventDefault();
+    //         window.open('https://www.linkedin.com/in/bhushan-songire', '_blank');
+    //     });
+    // }
+
+    // Resize = reload:
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            location.reload();
+        }, 500);
+    });
+
 });

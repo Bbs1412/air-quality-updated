@@ -23,6 +23,7 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     line-height: 1.6;
+    padding: 0px 20px;
 }
 
 
@@ -299,12 +300,35 @@ header h1 {
     color: var(--bg-gradient-1);
 }
 
-.plot2d,
-.plot3d {
+.plot2d{
     height: 400px;
-    width: 100%;
+    /* width: 100%; */
     border-radius: 0.5rem;
     overflow: hidden;
+}
+
+.plot3d{
+    height: 600px;
+    /* width: 100%; */
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+@media (max-width: 500px) {
+    .plot2d,
+    .plot3d {
+        padding: 1rem;
+        overflow-x:hidden;
+    }
+
+    .plot3d{
+        height: 500px;
+    }
+
+    .graph-header{
+        flex-direction: column;
+        gap: 0.5rem;
+    }
 }
 
 /* ------------------------------------------------------------------------------------ */
