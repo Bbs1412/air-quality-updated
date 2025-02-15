@@ -156,23 +156,6 @@ header h1 {
     margin-bottom: 2.25rem;
 }
 
-@media (max-width: 1200px) {
-    .metrics-grid {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    }
-}
-
-@media (max-width: 900px) {
-    .metrics-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 600px) {
-    .metrics-grid {
-        grid-template-columns: 1fr;
-    }
-}
 
 .metric-card {
     background: var(--card-bg);
@@ -184,7 +167,46 @@ header h1 {
     display: flex;
     align-items: center;
     text-align: left;
+    /* width: ;*/
+    /* justify-content: center; */
 }
+
+
+@media (max-width: 1200px) {
+    .metrics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 1000px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 660px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* To center the items with smaller width on med sized displays */
+/* @media (max-width: 660px) {
+    .metrics-grid {
+        justify-items: center;
+    }
+
+    .metric-card {
+        width: 20rem;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 400px) {
+    .metric-card {
+        max-width: unset;
+    }
+} */
 
 .metric-card:hover {
     transform: translateY(-5px);
@@ -200,7 +222,7 @@ header h1 {
     /* Increased size */
     height: 64px;
     /* Increased size */
-    margin-right: 1.5rem;
+    margin-right: 1rem;
     /* Added space between image and content */
     opacity: 0.8;
 }
@@ -523,16 +545,12 @@ footer .copyright {
 /* Charts Grid Section */
 /* ------------------------------------------------------------------------------------ */
 
+/* Containers for both charts: */
 .charts-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
     margin-bottom: 2.25rem;
-}
-
-.chart-card canvas {
-    width: 100% !important;
-    height: 300px !important; /* Fixed height to prevent vertical stretching */
 }
 
 .chart-card {
@@ -545,6 +563,11 @@ footer .copyright {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    min-height: 380px;
+    /* Added minimum height */
+    position: relative;
+    /* Added for better positioning */
 }
 
 .chart-card:hover {
@@ -555,61 +578,133 @@ footer .copyright {
 .chart-header {
     width: 100%;
     margin-bottom: 1.5rem;
+    text-align: center;
 }
 
 .chart-header h3 {
     color: var(--text-secondary);
-    font-size: 1.125rem;
-    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
-.aqi-label, .temp-difference {
-    margin-top: 1rem;
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    text-align: center;
+@media (max-width: 1200px) {
+    .chart-card {
+        padding: 1.5rem;
+    }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 660px) {
     .charts-grid {
         grid-template-columns: 1fr;
     }
 }
 
-.chart-card .gauge-container {
-    width: 300px;
-    height: 150px;
-    margin: 1rem auto;
+@media (max-width: 480px) {
+    .chart-card {
+        padding: 1rem;
+        min-height: 300px;
+    }
+}
+
+/* AQI - Gauge Chart Specific Styles */
+
+.gauge-container {
+    /* Set height in media queries... */
+    /* height: 50%; */
+    width: 100%;
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
-.chart-card .gauge-container canvas {
-    width: 100% !important;
-    height: 100% !important;
+.gauge-container canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin: 0 auto;
+
+    /* Since its semicircle, hence its plotted on only half of the canvas at bottom */
+    /* Hence, Move it up by 50% in its parent container */
+    transform: translateY(-10%);
 }
 
-.chart-card .card-icon {
-    margin: 1rem 0;
+@media (max-width: 850px) {
+    .gauge-container {
+        height: 55%;
+    }
 }
 
-.chart-card .card-icon img {
-    width: 48px;
-    height: 48px;
-    opacity: 0.8;
-}
-
-.aqi-label {
-    margin-top: 1rem;
-    color: var(--text-secondary);
-    font-size: 1rem;
+/* Charts Labels Styling */
+.aqi-label,
+.temp-difference {
+    width: max-content;
+    /* width: 100%; */
     text-align: center;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 3rem);
+    background: rgba(0, 242, 254, 0.1);
 }
 
-.aqi-label span {
-    display: inline-block;
-    margin-left: 0.5rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.875rem;
-    background: rgba(0, 242, 254, 0.1);
+/* Color variations for AQI levels */
+.aqi-label[data-level="Good"] {
+    background: rgba(72, 187, 120, 0.1);
+    color: #48bb78;
+}
+
+.aqi-label[data-level="Moderate"] {
+    background: rgba(246, 224, 94, 0.1);
+    color: #f6e05e;
+}
+
+.aqi-label[data-level="Sensitive"] {
+    background: rgba(237, 137, 54, 0.1);
+    color: #ed8936;
+}
+
+.aqi-label[data-level="Unhealthy"] {
+    background: rgba(245, 101, 101, 0.1);
+    color: #f56565;
+}
+
+.aqi-label[data-level="Very Unhealthy"] {
+    background: rgba(159, 122, 234, 0.1);
+    color: #9f7aea;
+}
+
+.aqi-label[data-level="Hazardous"] {
+    background: rgba(128, 0, 0, 0.1);
+    color: #800000;
+}
+
+@media (max-width: 480px) {
+
+    .aqi-label,
+    .temp-difference {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+
+/* Temperature Donut Chart Specific Styles */
+
+.temp-donut-container canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin: 0 auto;
 }

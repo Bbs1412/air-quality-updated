@@ -86,21 +86,21 @@ async function fetchAndPlotData(isInitialFetch = false) {
 
 
         // 2D Plots
-        plotData('plot2_temperature', data.bs_temp, 'Temperature');
-        plotData('plot2_humidity', data.bs_hum, 'Humidity');
-        plotData('plot2_air_quality', data.bs_mq135, 'Air Quality');
-        plotData('plot2_feels_like', data.bs_feel, 'Feels Like Temperature');
+        // plotData('plot2_temperature', data.bs_temp, 'Temperature');
+        // plotData('plot2_humidity', data.bs_hum, 'Humidity');
+        // plotData('plot2_air_quality', data.bs_mq135, 'Air Quality');
+        // plotData('plot2_feels_like', data.bs_feel, 'Feels Like Temperature');
 
         // 3D Plots
-        plot3D('plot3_temp_hum_feel',
-            data.bs_temp, data.bs_hum, data.bs_feel,
-            'Temperature', 'Humidity', 'Feels Like Temperature'
-        );
+        // plot3D('plot3_temp_hum_feel',
+        //     data.bs_temp, data.bs_hum, data.bs_feel,
+        //     'Temperature', 'Humidity', 'Feels Like Temperature'
+        // );
 
-        plot3D('plot3_feel_hum_aq',
-            data.bs_feel, data.bs_hum, data.bs_mq135,
-            'Feels Like Temperature', 'Humidity', 'Air Quality'
-        );
+        // plot3D('plot3_feel_hum_aq',
+        //     data.bs_feel, data.bs_hum, data.bs_mq135,
+        //     'Feels Like Temperature', 'Humidity', 'Air Quality'
+        // );
 
         // Check for emergencies
         AlertSystem.handleEmergency(data.bs_fire, data.bs_gas);
@@ -247,61 +247,96 @@ const LiveMonitoring = {
 // Chart Configurations
 // ------------------------------------------------------------------------------
 
+// Fixing chart consistency and implementing concentric circles for temperature analysis
 const ChartSystem = {
     gaugeChart: null,
-    donutChart: null,
+    tempChart: null,
 
     commonChartOptions: {
         responsive: true,
-        maintainAspectRatio: false,
-        // animation: false, // Disable animations for better performance[8]
-        resizeDelay: 100 // Debounce resize events
+        maintainAspectRatio: true,
+        resizeDelay: 100
     },
 
     initCharts() {
         this.initGaugeChart();
-        this.initDonutChart();
+        this.initTempChart();
+    },
+
+    getAQILevel(aqi) {
+        const levels = {
+            'Good': { text: 'Good', color: '#48bb78' },
+            'Moderate': { text: 'Moderate', color: '#f6e05e' },
+            'Sensitive': { text: 'Sensitive', color: '#ed8936' },
+            // 'Sensitive': { text: 'Unhealthy for Sensitive Groups', color: '#ed8936' },
+            'Unhealthy': { text: 'Unhealthy', color: '#f56565' },
+            'Very Unhealthy': { text: 'Very Unhealthy', color: '#9f7aea' },
+            'Hazardous': { text: 'Hazardous', color: '#800000' }
+        };
+
+        let level;
+        if (aqi <= 50) level = levels['Good'];
+        else if (aqi <= 100) level = levels['Moderate'];
+        else if (aqi <= 150) level = levels['Sensitive'];
+        else if (aqi <= 200) level = levels['Unhealthy'];
+        else if (aqi <= 300) level = levels['Very Unhealthy'];
+        else level = levels['Hazardous'];
+
+        const label = document.querySelector('.aqi-label');
+        label.style.backgroundColor = `${level.color}20`;
+        label.style.color = level.color;
+        return level.text;
     },
 
     initGaugeChart() {
-        const colors = {
-            good: '#48bb78',
-            moderate: '#f6e05e',
-            sensitive: '#ed8936',
-            unhealthy: '#f56565',
-            veryUnhealthy: '#9f7aea',
-            hazardous: '#800000'
-        };
-
         const target = document.getElementById('aqi-gauge');
-        this.gaugeChart = new Gauge(target).setOptions({
-            angle: -0.2,
-            lineWidth: 0.2,
-            radiusScale: 0.9,
+        this.gaugeChart = new Gauge(target);
+        this.gaugeChart.setOptions({
+            // Update the translate -30 in css to move the gauge up/down
+            // The angle range (in radians)
+            angle: 0, 
+            // Make the line thicker
+            lineWidth: 0.2, 
+            radiusScale: 0.75, 
             pointer: {
-                length: 0.6,
+                length: 0.5,
                 strokeWidth: 0.035,
-                color: '#00f2fe'
+                color: '#00f2fe',
+                iconPath: null
             },
             limitMax: true,
             limitMin: true,
+            colorStart: '#6FADCF',
+            colorStop: '#8FC0DA',
             strokeColor: '#1a1f2c',
             generateGradient: true,
             highDpiSupport: true,
+            // Color gradient
+            percentColors: [[0.0, "#48bb78"], [0.50, "#f6e05e"], [1.0, "#f56565"]], 
             staticLabels: {
                 font: "12px Inter",
                 labels: [0, 100, 200, 300, 400, 500],
-                color: '#a0aec0',
+                color: "#a0aec0",
                 fractionDigits: 0
             },
             staticZones: [
-                { strokeStyle: colors.good, min: 0, max: 50 },
-                { strokeStyle: colors.moderate, min: 51, max: 100 },
-                { strokeStyle: colors.sensitive, min: 101, max: 150 },
-                { strokeStyle: colors.unhealthy, min: 151, max: 200 },
-                { strokeStyle: colors.veryUnhealthy, min: 201, max: 300 },
-                { strokeStyle: colors.hazardous, min: 301, max: 500 }
-            ]
+                { strokeStyle: "#48bb78", min: 0, max: 50 },
+                { strokeStyle: "#f6e05e", min: 51, max: 100 },
+                { strokeStyle: "#ed8936", min: 101, max: 150 },
+                { strokeStyle: "#f56565", min: 151, max: 200 },
+                { strokeStyle: "#9f7aea", min: 201, max: 300 },
+                { strokeStyle: "#800000", min: 301, max: 500 }
+            ],
+            // renderTicks: {
+            //     divisions: 5,
+            //     divWidth: 1.1,
+            //     divLength: 0.7,
+            //     divColor: '#333333',
+            //     subDivisions: 3,
+            //     subLength: 0.5,
+            //     subWidth: 0.6,
+            //     subColor: '#666666'
+            // }
         });
 
         this.gaugeChart.maxValue = 500;
@@ -310,83 +345,44 @@ const ChartSystem = {
         this.gaugeChart.set(0);
     },
 
-    initDonutChart() {
+    initTempChart() {
         const ctx = document.getElementById('temp-donut').getContext('2d');
-        this.donutChart = new Chart(ctx, {
+        this.tempChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                datasets: [{
-                    data: [25, 75],
-                    backgroundColor: [
-                        'rgba(0, 242, 254, 0.8)',
-                        'rgba(79, 172, 254, 0.8)'
-                    ]
-                }]
+                datasets: [
+                    {
+                        data: [30, 70],
+                        backgroundColor: ['rgba(0, 242, 254, 0.8)', 'rgba(0, 0, 0, 0)'],
+                        borderWidth: 0
+                    },
+                    {
+                        data: [70, 30],
+                        backgroundColor: ['rgba(79, 172, 254, 0.8)', 'rgba(0, 0, 0, 0)'],
+                        borderWidth: 0
+                    }
+                ]
             },
             options: {
                 ...this.commonChartOptions,
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: { display: false }
-                }
+                cutout: '80%',
+                plugins: { legend: { display: false } }
             }
         });
     },
 
     updateCharts(temp, feels, aqi) {
-        // Update AQI Gauge
         this.gaugeChart.set(aqi);
+        document.querySelector('.aqi-label').textContent = `AQI: ${aqi} (${this.getAQILevel(aqi)})`;
 
-        // Update AQI label with level
-        const aqiLevel = this.getAQILevel(aqi);
-        document.querySelector('.aqi-label').innerHTML =
-            `${aqi} PPM <span>${aqiLevel}</span>`;
+        this.tempChart.data.datasets[0].data = [temp, 100 - temp];
+        this.tempChart.data.datasets[1].data = [feels, 100 - feels];
+        this.tempChart.update();
 
-            
-        // Update Temperature Donut
-        this.donutChart.data.datasets[0].data = [temp, feels];
-        this.donutChart.update();
-
-        // Update labels
-        document.querySelector('.aqi-label').textContent =
-            `AQI: ${aqi} (${this.getAQILevel(aqi)})`;
-        document.querySelector('.temp-difference').textContent =
-            `Actual: ${temp}°C | Feels Like: ${feels}°C`;
+        document.querySelector('.temp-difference').textContent = `Actual: ${temp}°C | Feels Like: ${feels}°C`;
     },
 
-    calculateAQISegments(aqi) {
-        const total = 500;
-        const segments = [0, 0, 0, 0, 0, 0];
 
-        if (aqi <= 50) segments[0] = aqi;
-        else if (aqi <= 100) segments[1] = aqi - 50;
-        else if (aqi <= 150) segments[2] = aqi - 100;
-        else if (aqi <= 200) segments[3] = aqi - 150;
-        else segments[4] = Math.min(aqi - 200, 300);
-
-        segments[5] = total - aqi;
-        return segments;
-    },
-
-    getAQIColor(aqi) {
-        if (aqi <= 50) return '#48bb78';
-        if (aqi <= 100) return '#f6e05e';
-        if (aqi <= 150) return '#ed8936';
-        if (aqi <= 200) return '#f56565';
-        return '#9f7aea';
-    },
-
-    getAQILevel(aqi) {
-        if (aqi <= 50) return 'Good';
-        if (aqi <= 100) return 'Moderate';
-        if (aqi <= 150) return 'Sensitive';
-        // if (aqi <= 150) return 'Unhealthy for Sensitive Groups';
-        if (aqi <= 200) return 'Unhealthy';
-        if (aqi <= 300) return 'Very Unhealthy';
-        return 'Hazardous';
-    }
 };
 
 
