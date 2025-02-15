@@ -1,6 +1,7 @@
 // ------------------------------------------------------------------------------
 // Constants and DOM Elements
 // ------------------------------------------------------------------------------
+
 const Dashboard = {
     elements: {
         temp: document.getElementById('dash_temp'),
@@ -23,10 +24,12 @@ const Modal = {
 // ------------------------------------------------------------------------------
 // Dashboard Updates
 // ------------------------------------------------------------------------------
+
 function updateReadings(temp, hum, aq) {
     Dashboard.elements.temp.innerHTML = `${temp}°C`;
     Dashboard.elements.hum.innerHTML = `${hum}%`;
-    Dashboard.elements.aq.innerHTML = aq;
+    // Dashboard.elements.aq.innerHTML = `${aq} ADC`;
+    Dashboard.elements.aq.innerHTML = `${aq}ppm`;
 
     const now = new Date();
     const hours = String(now.getHours() % 12 || 12).padStart(2, '0');
@@ -41,6 +44,9 @@ function updateReadings(temp, hum, aq) {
 // ------------------------------------------------------------------------------
 // Data Fetching and Plotting
 // ------------------------------------------------------------------------------
+
+let points_count = 1;
+
 async function fetchAndPlotData(isInitialFetch = false) {
     try {
         let data;
@@ -55,8 +61,9 @@ async function fetchAndPlotData(isInitialFetch = false) {
             // const response = await fetch('/get_data');
             // data = await response.json();
 
-            const points_count = 1000;
-            const response = await fetch(`/get_init_data/${points_count}`);
+            // Simulate data fetch:
+            points_count += 1;
+            const response = await fetch(`/get_serial_data/${points_count}`);
             data = await response.json();
         }
 
@@ -68,6 +75,15 @@ async function fetchAndPlotData(isInitialFetch = false) {
             data.bs_hum[data.bs_hum.length - 1],
             data.bs_mq135[data.bs_mq135.length - 1]
         );
+
+        // Gauge and Donut Charts:
+        // In the try block of fetchAndPlotData, after updating readings:
+        ChartSystem.updateCharts(
+            data.bs_temp[data.bs_temp.length - 1],
+            data.bs_feel[data.bs_feel.length - 1],
+            data.bs_mq135[data.bs_mq135.length - 1]
+        );
+
 
         // 2D Plots
         plotData('plot2_temperature', data.bs_temp, 'Temperature');
@@ -97,6 +113,7 @@ async function fetchAndPlotData(isInitialFetch = false) {
 // ------------------------------------------------------------------------------
 // Emergency Alert System
 // ------------------------------------------------------------------------------
+
 const AlertSystem = {
     handleEmergency(fire, gas) {
         if (!fire && !gas) {
@@ -176,10 +193,11 @@ const AlertSystem = {
 // ------------------------------------------------------------------------------
 // Live Monitoring System
 // ------------------------------------------------------------------------------
+
 const LiveMonitoring = {
     active: false,
     interval: null,
-    update_interval: 10 * 1000,  // x seconds
+    update_interval: 5 * 1000,  // x seconds
 
     init() {
         const liveBtn = document.getElementById('live-monitor-btn');
@@ -226,11 +244,162 @@ const LiveMonitoring = {
 };
 
 // ------------------------------------------------------------------------------
+// Chart Configurations
+// ------------------------------------------------------------------------------
+
+const ChartSystem = {
+    gaugeChart: null,
+    donutChart: null,
+
+    commonChartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        // animation: false, // Disable animations for better performance[8]
+        resizeDelay: 100 // Debounce resize events
+    },
+
+    initCharts() {
+        this.initGaugeChart();
+        this.initDonutChart();
+    },
+
+    initGaugeChart() {
+        const colors = {
+            good: '#48bb78',
+            moderate: '#f6e05e',
+            sensitive: '#ed8936',
+            unhealthy: '#f56565',
+            veryUnhealthy: '#9f7aea',
+            hazardous: '#800000'
+        };
+
+        const target = document.getElementById('aqi-gauge');
+        this.gaugeChart = new Gauge(target).setOptions({
+            angle: -0.2,
+            lineWidth: 0.2,
+            radiusScale: 0.9,
+            pointer: {
+                length: 0.6,
+                strokeWidth: 0.035,
+                color: '#00f2fe'
+            },
+            limitMax: true,
+            limitMin: true,
+            strokeColor: '#1a1f2c',
+            generateGradient: true,
+            highDpiSupport: true,
+            staticLabels: {
+                font: "12px Inter",
+                labels: [0, 100, 200, 300, 400, 500],
+                color: '#a0aec0',
+                fractionDigits: 0
+            },
+            staticZones: [
+                { strokeStyle: colors.good, min: 0, max: 50 },
+                { strokeStyle: colors.moderate, min: 51, max: 100 },
+                { strokeStyle: colors.sensitive, min: 101, max: 150 },
+                { strokeStyle: colors.unhealthy, min: 151, max: 200 },
+                { strokeStyle: colors.veryUnhealthy, min: 201, max: 300 },
+                { strokeStyle: colors.hazardous, min: 301, max: 500 }
+            ]
+        });
+
+        this.gaugeChart.maxValue = 500;
+        this.gaugeChart.setMinValue(0);
+        this.gaugeChart.animationSpeed = 32;
+        this.gaugeChart.set(0);
+    },
+
+    initDonutChart() {
+        const ctx = document.getElementById('temp-donut').getContext('2d');
+        this.donutChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [25, 75],
+                    backgroundColor: [
+                        'rgba(0, 242, 254, 0.8)',
+                        'rgba(79, 172, 254, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                ...this.commonChartOptions,
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    },
+
+    updateCharts(temp, feels, aqi) {
+        // Update AQI Gauge
+        this.gaugeChart.set(aqi);
+
+        // Update AQI label with level
+        const aqiLevel = this.getAQILevel(aqi);
+        document.querySelector('.aqi-label').innerHTML =
+            `${aqi} PPM <span>${aqiLevel}</span>`;
+
+            
+        // Update Temperature Donut
+        this.donutChart.data.datasets[0].data = [temp, feels];
+        this.donutChart.update();
+
+        // Update labels
+        document.querySelector('.aqi-label').textContent =
+            `AQI: ${aqi} (${this.getAQILevel(aqi)})`;
+        document.querySelector('.temp-difference').textContent =
+            `Actual: ${temp}°C | Feels Like: ${feels}°C`;
+    },
+
+    calculateAQISegments(aqi) {
+        const total = 500;
+        const segments = [0, 0, 0, 0, 0, 0];
+
+        if (aqi <= 50) segments[0] = aqi;
+        else if (aqi <= 100) segments[1] = aqi - 50;
+        else if (aqi <= 150) segments[2] = aqi - 100;
+        else if (aqi <= 200) segments[3] = aqi - 150;
+        else segments[4] = Math.min(aqi - 200, 300);
+
+        segments[5] = total - aqi;
+        return segments;
+    },
+
+    getAQIColor(aqi) {
+        if (aqi <= 50) return '#48bb78';
+        if (aqi <= 100) return '#f6e05e';
+        if (aqi <= 150) return '#ed8936';
+        if (aqi <= 200) return '#f56565';
+        return '#9f7aea';
+    },
+
+    getAQILevel(aqi) {
+        if (aqi <= 50) return 'Good';
+        if (aqi <= 100) return 'Moderate';
+        if (aqi <= 150) return 'Sensitive';
+        // if (aqi <= 150) return 'Unhealthy for Sensitive Groups';
+        if (aqi <= 200) return 'Unhealthy';
+        if (aqi <= 300) return 'Very Unhealthy';
+        return 'Hazardous';
+    }
+};
+
+
+// ------------------------------------------------------------------------------
 // Initialization
 // ------------------------------------------------------------------------------
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize live monitoring
     LiveMonitoring.init();
+
+    // Initialize charts
+    ChartSystem.initCharts();
 
     // Request notification permissions
     if ("Notification" in window) {
@@ -247,8 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial data fetch
     fetchAndPlotData(isInitialFetch = true);
 
-    // Start live monitoring
-    LiveMonitoring.startLiveMonitoring();
+    // Start live monitoring (only for development)
+    // LiveMonitoring.startLiveMonitoring();
 
     // Copyright link
     const authorLink = document.querySelector('.author-link');

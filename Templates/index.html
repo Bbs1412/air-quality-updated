@@ -19,6 +19,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://bernii.github.io/gauge.js/dist/gauge.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -48,7 +51,8 @@
                 </div>
                 <div class="card-content">
                     <h3>Air Quality</h3>
-                    <p class="metric-value" id="dash_aq">---</p>
+                    <!-- <p class="metric-value" id="dash_aq">--- ADC</p> -->
+                    <p class="metric-value" id="dash_aq">---ppm</p>
                 </div>
             </div>
 
@@ -62,6 +66,28 @@
                 </div>
             </div>
         </div>
+
+        <!-- Middle Charts Section: -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Air Quality Index</h3>
+                </div>
+                <div class="gauge-container">
+                    <canvas id="aqi-gauge"></canvas>
+                </div>
+                <div class="aqi-label"></div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Temperature Analysis</h3>
+                </div>
+                <canvas id="temp-donut"></canvas>
+                <div class="temp-difference"></div>
+            </div>
+        </div>
+
 
         <div class="graphs-container">
 
