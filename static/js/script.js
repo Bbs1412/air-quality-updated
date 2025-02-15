@@ -77,40 +77,41 @@ async function fetchAndPlotData(isInitialFetch = false) {
         );
 
         // Gauge and Donut Charts:
-        // In the try block of fetchAndPlotData, after updating readings:
         ChartSystem.updateCharts(
             data.bs_temp[data.bs_temp.length - 1],
             data.bs_feel[data.bs_feel.length - 1],
             data.bs_mq135[data.bs_mq135.length - 1]
         );
 
+        // Update the plots:
+        PlotlyChartSystem.update2D('plot2_temperature', data.bs_temp);
+        PlotlyChartSystem.update2D('plot2_humidity', data.bs_hum);
+        PlotlyChartSystem.update2D('plot2_air_quality', data.bs_mq135);
+        PlotlyChartSystem.update2D('plot2_feels_like', data.bs_feel);
 
-        // 2D Plots (plotData2 is new, plotData is old):
-        plotData2('plot2_temperature', data.bs_temp, 'Temperature');
-        plotData2('plot2_humidity', data.bs_hum, 'Humidity');
-        plotData2('plot2_air_quality', data.bs_mq135, 'Air Quality');
-        plotData2('plot2_feels_like', data.bs_feel, 'Feels Like Temperature');
+        PlotlyChartSystem.update3D('plot3_temp_hum_feel', data.bs_temp, data.bs_hum, data.bs_feel);
+        PlotlyChartSystem.update3D('plot3_feel_hum_aq', data.bs_feel, data.bs_hum, data.bs_mq135);
 
-        // Mix n Match:
-        // plotData('plot2_temperature', data.bs_temp, 'Temperature');
+        // // 2D Plots (plotData2 is new, plotData is old):
+        // plotData2('plot2_temperature', data.bs_temp, 'Temperature');
         // plotData2('plot2_humidity', data.bs_hum, 'Humidity');
-        // plotData('plot2_air_quality', data.bs_mq135, 'Air Quality');
+        // plotData2('plot2_air_quality', data.bs_mq135, 'Air Quality');
         // plotData2('plot2_feels_like', data.bs_feel, 'Feels Like Temperature');
 
-        // 3D Plots
-        plot3Dv2('plot3_temp_hum_feel',
-            data.bs_temp, data.bs_hum, data.bs_feel,
-            'Temperature', 'Humidity', 'Feels Like Temperature',
-            'Magma'
-        );
+        // // 3D Plots
+        // plot3Dv2('plot3_temp_hum_feel',
+        //     data.bs_temp, data.bs_hum, data.bs_feel,
+        //     'Temperature', 'Humidity', 'Feels Like Temperature',
+        //     'Magma'
+        // );
 
-        plot3Dv2('plot3_feel_hum_aq',
-            data.bs_feel, data.bs_hum, data.bs_mq135,
-            'Feels Like Temperature', 'Humidity', 'Air Quality',
-            'Electric'
-        );
+        // plot3Dv2('plot3_feel_hum_aq',
+        //     data.bs_feel, data.bs_hum, data.bs_mq135,
+        //     'Feels Like Temperature', 'Humidity', 'Air Quality',
+        //     'Electric'
+        // );
 
-        
+
         // Check for emergencies
         AlertSystem.handleEmergency(data.bs_fire, data.bs_gas);
     } catch (error) {
@@ -253,7 +254,7 @@ const LiveMonitoring = {
 };
 
 // ------------------------------------------------------------------------------
-// Chart Configurations
+// Chart Configurations (AQI and Temperature)
 // ------------------------------------------------------------------------------
 
 // Fixing chart consistency and implementing concentric circles for temperature analysis
@@ -390,9 +391,244 @@ const ChartSystem = {
 
         document.querySelector('.temp-difference').textContent = `Actual: ${temp}°C | Feels Like: ${feels}°C`;
     },
-
-
 };
+
+// ------------------------------------------------------------------------------
+// Historical Data Plots (2D and 3D)
+// ------------------------------------------------------------------------------
+
+const PlotlyChartSystem = {
+    plots: {}, // Store initialized plot references
+
+    // ----------------------------------------------------------------
+    // 2D Plot - Old Method (plotData)
+    // ----------------------------------------------------------------
+    plotData_legacy(elementId, data, yLabel) {
+        const len = data.length;
+        const div = Math.floor(len / 24);
+        let j = 0;
+        let num = 0;
+        let xValues = [];
+
+        for (let i = 0; i < len - 1; i++) {
+            if (i == num && j != 24) {
+                xValues.push(`${j}:00`);
+                num += div;
+                j++;
+            } else {
+                xValues.push("xx:" + i);
+            }
+        }
+        xValues.push('23:59');
+
+        const trace = {
+            x: xValues,
+            y: data,
+            type: 'scatter',
+            mode: 'lines+markers',
+            marker: { color: 'white', size: 3 },
+            line: { color: 'lightgreen' }
+        };
+
+        const layout = {
+            plot_bgcolor: 'black',
+            paper_bgcolor: 'black',
+            xaxis: {
+                color: 'white',
+                title: 'Time',
+                tickvals: ["0:00", "4:00", "8:00", "12:00", "16:00", "20:00", "23:59"]
+            },
+            yaxis: {
+                color: 'white',
+                title: yLabel
+            }
+        };
+
+        Plotly.newPlot(elementId, [trace], layout);
+    },
+
+    // ----------------------------------------------------------------
+    // 2D Plot - New Optimized Method (plotData2)
+    // ----------------------------------------------------------------
+    init2D(elementId, yLabel) {
+        const trace = {
+            x: this.generateTimeLabels(100),  // Initial dummy data
+            y: new Array(100).fill(0),
+            type: 'scatter',
+            mode: 'lines',
+            line: {
+                color: '#00f2fe',
+                width: 3,
+                shape: 'spline'
+            },
+            fill: 'tozeroy',
+            fillcolor: 'rgba(0, 242, 254, 0.1)'
+        };
+
+        const layout = {
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            font: {
+                color: '#a0aec0',
+                family: 'Inter, sans-serif'
+            },
+            margin: {
+                l: 50, r: 30,
+                t: 30, b: 50
+            },
+            xaxis: {
+                showgrid: true,
+                gridcolor: 'rgba(255,255,255,0.1)',
+                tickformat: '%H:%M'
+            },
+            yaxis: {
+                title: yLabel,
+                showgrid: true,
+                gridcolor: 'rgba(255,255,255,0.1)'
+            }
+        };
+
+        Plotly.newPlot(elementId, [trace], layout, {
+            responsive: true,
+            displayModeBar: false
+        });
+
+        // Store plot reference:
+        this.plots[elementId] = {
+            data: trace, layout
+        };
+    },
+
+    update2D(elementId, data) {
+        if (this.plots[elementId]) {
+            Plotly.update(elementId, {
+                y: [data],
+                x: [this.generateTimeLabels(data.length)]
+            });
+        }
+    },
+
+    // ----------------------------------------------------------------
+    // 3D Plot - Old Method (plot3D)
+    // ----------------------------------------------------------------
+    plot3D_legacy(elementId, xData, yData, zData, xLabel, yLabel, zLabel) {
+        const trace = {
+            x: xData,
+            y: yData,
+            z: zData,
+            mode: 'markers',
+            marker: {
+                color: 'rgb(23, 190, 207)',
+                size: 12,
+                line: {
+                    color: 'rgba(217, 217, 217, 0.14)',
+                    width: 0.5
+                },
+                opacity: 0.8
+            },
+            type: 'scatter3d'
+        };
+
+        const layout = {
+            margin: { l: 0, r: 0, b: 0, t: 0 },
+            paper_bgcolor: 'black',
+            scene: {
+                xaxis: { color: 'white', title: xLabel },
+                yaxis: { color: 'white', title: yLabel },
+                zaxis: { color: 'white', title: zLabel }
+            }
+        };
+
+        Plotly.newPlot(elementId, [trace], layout);
+    },
+
+    // ----------------------------------------------------------------
+    // 3D Plot - New Optimized Method (plot3Dv2)
+    // ----------------------------------------------------------------
+    init3D(elementId, xLabel, yLabel, zLabel, palette = 'Viridis') {
+        const trace = {
+            type: 'scatter3d',
+            mode: 'markers',
+            x: [],
+            y: [],
+            z: [],
+            marker: {
+                size: 11,
+                color: [],
+                colorscale: palette,
+                opacity: 0.8
+            }
+        };
+
+        const layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            scene: {
+                xaxis: {
+                    title: xLabel,
+                    gridcolor: 'rgba(255,255,255,0.1)',
+                    // showbackground: true,
+                    backgroundcolor: 'rgba(0,0,0,0)'
+                },
+                yaxis: {
+                    title: yLabel,
+                    gridcolor: 'rgba(255,255,255,0.1)',
+                    // showbackground: true,
+                    backgroundcolor: 'rgba(0,0,0,0)'
+                },
+                zaxis: {
+                    title: zLabel,
+                    gridcolor: 'rgba(255,255,255,0.1)',
+                    // showbackground: true,
+                    backgroundcolor: 'rgba(0,0,0,0)'
+                },
+                camera: {
+                    // eye: {x: 1.5, y: 1.5, z: 1.5}
+                    eye: { x: 0.8, y: 0.8, z: 0.2 }
+                }
+            },
+            margin: { l: 0, r: 0, t: 0, b: 0 }
+        };
+
+        Plotly.newPlot(elementId, [trace], layout, {
+            responsive: true,
+            displayModeBar: true,
+            displaylogo: false
+        });
+
+        // Store plot reference:
+        this.plots[elementId] = { data: trace, layout };
+    },
+
+    update3D(elementId, xData, yData, zData) {
+        if (this.plots[elementId]) {
+            Plotly.update(elementId, {
+                x: [xData],
+                y: [yData],
+                z: [zData],
+                'marker.color': [zData]
+            });
+        }
+    },
+
+    // ----------------------------------------------------------------
+    // Generate Time Labels
+    // ----------------------------------------------------------------
+    generateTimeLabels(count) {
+        const labels = [];
+        const now = new Date();
+        const interval = 24 * 60 / count;
+
+        for (let i = 0; i < count; i++) {
+            const time = new Date(now - (count - i) * interval * 60000);
+            labels.push(time);
+        }
+
+        return labels;
+    }
+};
+
+
+
 
 
 // ------------------------------------------------------------------------------
@@ -400,11 +636,6 @@ const ChartSystem = {
 // ------------------------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize live monitoring
-    LiveMonitoring.init();
-
-    // Initialize charts
-    ChartSystem.initCharts();
 
     // Request notification permissions
     if ("Notification" in window) {
@@ -417,6 +648,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Initialize live monitoring
+    LiveMonitoring.init();
+
+    // Initialize charts
+    ChartSystem.initCharts();
+
+    // Initialize optimized 2d, 3d plots
+    PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
+    PlotlyChartSystem.init2D('plot2_humidity', 'Humidity');
+    PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality');
+    PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature');
+
+    PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
+    PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
 
     // Initial data fetch
     fetchAndPlotData(isInitialFetch = true);
@@ -443,3 +689,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
+
+
+// ------------------------------------------------------------------------------
+// Play:
+// ------------------------------------------------------------------------------
+// Dashboard:
+// updateReadings(temp = 25, hum = 50, aq = 200);
+// Charts:
+// ChartSystem.updateCharts(temp=25, feels=27, aqi=200);
+// Alerts:
+// AlertSystem.show(fire = true, gas = false);
