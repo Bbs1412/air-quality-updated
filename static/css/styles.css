@@ -461,33 +461,111 @@ footer .copyright {
 /* Alert Modal */
 /* ------------------------------------------------------------------------------------ */
 
-#alert-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(26, 31, 44, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 1.5rem;
+/* #alert-modal .modal-content {
+    background: var(--bg-gradient-1);
     border: 1px solid var(--danger);
-    padding: 2rem;
-    z-index: 1000;
-    width: 90%;
     max-width: 600px;
-
 }
 
-.alert-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+#alert-modal .modal-header {
+    border-bottom: 1px solid rgba(245, 101, 101, 0.2);
+}
+
+#alert-modal .alert-title {
+    color: var(--danger);
+}
+
+#alert-modal .alert-content {
+    padding: 2rem;
     text-align: center;
 }
 
-.alert-content .close-alert {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
+#alert-modal .alert-icon {
+    width: 15rem;
+    height: auto;
+    margin-bottom: 1.5rem;
+}
+
+#alert-modal .alert-message {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+#alert-modal .emergency-contacts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+#alert-modal .emergency-contacts button {
+    background: var(--danger);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+} */
+
+
+/* ------------------------------------------------------------------------------------ */
+/* Alert Modal - Bold Yet Controlled */
+/* ------------------------------------------------------------------------------------ */
+
+#alert-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 31, 44, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px; /* Ensures it doesn't overflow */
+}
+
+#alert-modal.hidden {
+    display: none;
+}
+
+#alert-modal .modal-content {
+    background: var(--bg-gradient-1);
+    border: 2px solid var(--danger);
+    border-radius: 1.5rem;
+    width: 90%;
+    max-width: 600px;  /* Adjusted for better fit */
+    max-height: 90vh; /* Prevents overflow */
+    overflow-y: auto; /* Enables scrolling if content overflows */
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(245, 101, 101, 0.5);
+    animation: emergencyPulse 1.5s infinite alternate;
+}
+
+/* Emergency Pulse Animation */
+@keyframes emergencyPulse {
+    0% { box-shadow: 0 0 30px rgba(245, 101, 101, 0.4); }
+    100% { box-shadow: 0 0 50px rgba(245, 101, 101, 0.7); }
+}
+
+#alert-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(245, 101, 101, 0.4);
+}
+
+#alert-modal .alert-title {
+    color: var(--danger);
+    font-size: 2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#alert-modal .close-modal {
     background: none;
     border: none;
     color: var(--text-secondary);
@@ -496,73 +574,140 @@ footer .copyright {
     transition: color 0.3s ease;
 }
 
-.alert-content .close-alert:hover {
+#alert-modal .close-modal:hover {
     color: var(--danger);
 }
 
-.alert-content img {
-    width: 15rem;
+#alert-modal .modal-body {
+    padding: 1.5rem 1rem;
+}
+
+#alert-modal .alert-icon {
+    width: 12rem;
     height: auto;
-    margin-bottom: 1.5rem;
-}
-
-.alert-content h2 {
-    color: var(--danger);
-    font-size: 2.5rem;
     margin-bottom: 1rem;
+    filter: drop-shadow(0 0 10px rgba(245, 101, 101, 0.6));
 }
 
-.alert-content p {
+#alert-modal .alert-subtitle {
+    color: var(--danger);
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+#alert-modal .alert-message {
     color: var(--text-primary);
     font-size: 1.2rem;
-    margin-bottom: 2rem;
-    line-height: 1.6;
-}
-
-.emergency-contacts {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    width: 100%;
-}
-
-.emergency-contacts button {
-    background: var(--danger);
-    color: var(--text-primary);
-    border: none;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    font-size: 1rem;
     font-weight: 500;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+#alert-modal .emergency-contacts {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+#alert-modal .emergency-btn {
+    background: var(--danger);
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem; /* Reduced size */
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 400;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    text-align: center;
+    width: 120px; /* Adjusted for better fit */
+    box-shadow: 0 0 10px rgba(245, 101, 101, 0.3);
 }
 
-.emergency-contacts button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+#alert-modal .emergency-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(245, 101, 101, 0.5);
 }
+
+#alert-modal .btn-label {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+#alert-modal .btn-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Responsive Fixes */
+/* ------------------------------------------------------------------------------------ */
 
 @media (max-width: 768px) {
-    .emergency-contacts {
-        grid-template-columns: 1fr;
+    #alert-modal .modal-content {
+        max-width: 500px;
+        padding: 1.75rem;
     }
 
-    .alert-content img {
+    #alert-modal .alert-title {
+        font-size: 1.8rem;
+    }
+
+    #alert-modal .alert-icon {
         width: 10rem;
     }
 
-    .alert-content h2 {
-        font-size: 1.5rem;
+    #alert-modal .alert-message {
+        font-size: 1.1rem;
     }
 
-    .alert-content p {
+    #alert-modal .emergency-contacts {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    #alert-modal .emergency-btn {
+        width: 6.4rem;
+        padding: 0.6rem;
+    }
+}
+
+@media (max-width: 520px) {
+    #alert-modal {
+        padding: 10px; /* Prevents modal from touching screen edges */
+    }
+
+    #alert-modal .modal-content {
+        max-width: 350px;
+        padding: 1.5rem;
+    }
+
+    #alert-modal .alert-title {
+        font-size: 1.6rem;
+    }
+
+    #alert-modal .alert-icon {
+        width: 10rem;
+    }
+
+    #alert-modal .alert-message {
         font-size: 1rem;
     }
 
-    .alert-content button {
-        padding: 0.75rem;
-        font-size: 1rem;
+    #alert-modal .emergency-contacts {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    #alert-modal .emergency-btn {
+        width: 100%;
+        padding: 0.6rem;
     }
 }
 
@@ -680,7 +825,7 @@ footer .copyright {
 }
 
 @media (max-width: 950px) {
-    .gauge-container{
+    .gauge-container {
         margin-top: 5%;
         height: 60%;
     }
@@ -705,6 +850,7 @@ footer .copyright {
 }
 
 @media (max-width: 660px) {
+
     .gauge-container,
     .temp-donut-container {
         height: 60%;
@@ -716,6 +862,7 @@ footer .copyright {
 }
 
 @media (max-width: 320px) {
+
     .gauge-container,
     .temp-donut-container {
         height: 50%;

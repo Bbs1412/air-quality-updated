@@ -93,7 +93,7 @@
         <!-- Temp Test Chart -->
         <div id="test-container">
         </div>
-        
+
         <!-- Temp Test Chart -->
 
         <div class="graphs-container">
@@ -190,9 +190,57 @@
         </footer>
     </div>
 
-    <div id="alert-modal" class="hidden">
-        <!-- Alert content will be dynamically inserted -->
+    <!-- Alert Modal -->
+    <!-- <div id="alert-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="alert-title">Emergency Alert</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body alert-content">
+                <img src="" alt="Emergency" class="alert-icon">
+                <p class="alert-message"></p>
+                <div class="emergency-contacts">
+                    <button onclick="window.location.href='tel:112'">Police: 112</button>
+                    <button onclick="window.location.href='tel:101'">Fire: 101</button>
+                    <button onclick="window.location.href='tel:102'">Ambulance: 102</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+
+    <!-- <button id="close-alert-modal" class="close-modal">&times;</button> -->
+    <div id="alert-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="alert-title">Emergency Alert</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-content">
+                    <img src="" alt="Emergency" class="alert-icon">
+                    <h3 class="alert-subtitle"></h3>
+                    <p class="alert-message"></p>
+                    <div class="emergency-contacts">
+                        <button onclick="window.location.href='tel:112'" class="emergency-btn">
+                            <span class="btn-label">Police</span>
+                            <span class="btn-number">112</span>
+                        </button>
+                        <button onclick="window.location.href='tel:101'" class="emergency-btn">
+                            <span class="btn-label">Fire</span>
+                            <span class="btn-number">101</span>
+                        </button>
+                        <button onclick="window.location.href='tel:102'" class="emergency-btn">
+                            <span class="btn-label">Ambulance</span>
+                            <span class="btn-number">102</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 
     <!-- Add the authentication modal, for real time data fetch -->
     <div id="live-auth-modal" class="modal hidden">

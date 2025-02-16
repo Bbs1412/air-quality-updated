@@ -21,6 +21,16 @@ const Modal = {
     }
 };
 
+const AlertModal = {
+    elements: {
+        modal: document.getElementById('alert-modal'),
+        title: document.querySelector('.alert-title'),
+        message: document.querySelector('.alert-message'),
+        icon: document.querySelector('.alert-icon'),
+        closeBtn: document.querySelector('.close-modal')
+    }
+};
+
 // ------------------------------------------------------------------------------
 // Dashboard Updates
 // ------------------------------------------------------------------------------
@@ -94,6 +104,7 @@ async function fetchAndPlotData(isInitialFetch = false) {
 
         // Check for emergencies
         AlertSystem.handleEmergency(data.bs_fire, data.bs_gas);
+        console.log('Emergency:', data.bs_fire, data.bs_gas);
     } catch (error) {
         console.error('Data fetch failed:', error);
         updateReadings('--', '--', '---');
@@ -114,25 +125,30 @@ const AlertSystem = {
     },
 
     show(fire, gas) {
-        const alertContent = this.generateAlertContent(fire, gas);
-        Modal.elements.alert.innerHTML = alertContent;
-        Modal.elements.alert.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+        const alert = this.generateAlertContent(fire, gas);
 
-        const dashboard = document.querySelector('.dashboard');
-        dashboard.style.filter = 'blur(8px)';
+        // Update DOM elements
+        AlertModal.elements.title.textContent = alert.title;
+        AlertModal.elements.icon.src = `static/img/${alert.icon}`;
+        AlertModal.elements.message.textContent = alert.message;
+
+        // Show modal
+        AlertModal.elements.modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
 
         this.notifyUser(fire, gas);
     },
 
     hide() {
-        const dashboard = document.querySelector('.dashboard');
-        dashboard.style.filter = 'none';
-
-        Modal.elements.alert.classList.add('hidden');
+        AlertModal.elements.modal.classList.add('hidden');
         document.body.style.overflow = 'auto';
     },
 
+    init() {
+        AlertModal.elements.modal.classList.add('hidden');
+        AlertModal.elements.closeBtn.addEventListener('click', () => this.hide());
+        this.hide();
+    },
 
     generateAlertContent(fire, gas) {
         const type = fire && gas ? 'both' : fire ? 'fire' : 'gas';
@@ -154,20 +170,7 @@ const AlertSystem = {
             }
         };
 
-        const alert = alerts[type];
-        return `
-            <div class="alert-content">
-                <button class="close-alert" onclick="AlertSystem.hide()">&times;</button>
-                <img src="static/img/${alert.icon}" alt="Emergency">
-                <h2>${alert.title}</h2>
-                <p>${alert.message}</p>
-                <div class="emergency-contacts">
-                    <button onclick="window.location.href='tel:112'">Police: 112</button>
-                    <button onclick="window.location.href='tel:101'">Fire: 101</button>
-                    <button onclick="window.location.href='tel:102'">Ambulance: 102</button>
-                </div>
-            </div>
-        `;
+        return alerts[type];
     },
 
 
@@ -337,7 +340,7 @@ const ChartSystem = {
 
         this.gaugeChart.maxValue = 500;
         this.gaugeChart.setMinValue(0);
-        this.gaugeChart.animationSpeed = 32;
+        this.gaugeChart.animationSpeed = 60;
         this.gaugeChart.set(0);
     },
 
@@ -699,6 +702,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize live monitoring
     LiveMonitoring.init();
+
+    // Initialize alert system
+    AlertSystem.init();
 
     // Initialize charts
     ChartSystem.initCharts();
