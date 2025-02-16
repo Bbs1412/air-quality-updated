@@ -12,12 +12,15 @@ const Dashboard = {
     }
 };
 
-const Modal = {
+const AuthModal = {
     elements: {
         liveAuth: document.getElementById('live-auth-modal'),
         alert: document.getElementById('alert-modal'),
-        closeBtn: document.querySelector('.close-modal'),
-        authForm: document.getElementById('auth-form')
+        closeBtn: document.querySelector('#live-auth-modal .close-modal'),
+        authForm: document.getElementById('auth-form'),
+        simulationForm: document.getElementById('simulation-form'),
+        pointsInput: document.getElementById('points'),
+        intervalInput: document.getElementById('interval')
     }
 };
 
@@ -27,7 +30,7 @@ const AlertModal = {
         title: document.querySelector('.alert-title'),
         message: document.querySelector('.alert-message'),
         icon: document.querySelector('.alert-icon'),
-        closeBtn: document.querySelector('.close-modal')
+        closeBtn: document.querySelector('#alert-modal .close-modal')
     }
 };
 
@@ -63,8 +66,8 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
 
         // First data fetch (initial data, pre saved)
         if (isInitialFetch) {
-            const points_count = 30;
-            const response = await fetch(`/get_init_data/${points_count}`);
+            const init_points_count = 30;
+            const response = await fetch(`/get_init_data/${init_points_count}`);
             data = await response.json();
         }
 
@@ -108,7 +111,7 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
 
         // Check for emergencies
         AlertSystem.handleEmergency(data.bs_fire, data.bs_gas);
-        console.log('Emergency:', data.bs_fire, data.bs_gas);
+        // console.log('Emergency:', data.bs_fire, data.bs_gas);
     } catch (error) {
         console.error('Data fetch failed:', error);
         updateReadings('--', '--', '---');
@@ -204,39 +207,160 @@ const LiveMonitoring = {
     update_interval: 5 * 1000,  // x seconds
 
     init() {
+        // Control "Live Monitoring" button
         const liveBtn = document.getElementById('live-monitor-btn');
         liveBtn.addEventListener('click', () => this.showModal());
-        Modal.elements.closeBtn.addEventListener('click', () => this.hideModal());
-        Modal.elements.authForm.addEventListener('submit', (e) => this.handleAuth(e));
+
+        this.focusOnActiveTab();
+        this.handleNumericInput();
+
+        // Submit and close behavior
+        AuthModal.elements.authForm.addEventListener('submit', (e) => this.handleAuth(e));
+        AuthModal.elements.simulationForm.addEventListener('submit', (e) => this.handleSimulation(e));
+
+        AuthModal.elements.liveAuth.classList.add('hidden');
+        AuthModal.elements.closeBtn.addEventListener('click', () => this.hideModal());
     },
 
     showModal() {
-        Modal.elements.liveAuth.classList.remove('hidden');
+        AuthModal.elements.liveAuth.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     },
 
     hideModal() {
-        Modal.elements.liveAuth.classList.add('hidden');
+        AuthModal.elements.liveAuth.classList.add('hidden');
         document.body.style.overflow = 'auto';
-        Modal.elements.authForm.reset();
+        // AuthModal.elements.liveAuth.classList.add('hidden');
+        AuthModal.elements.authForm.reset();
+        AuthModal.elements.simulationForm.reset();
     },
 
-    handleAuth(event) {
+    // fn which changes css for active tab in "Live Monitoring" modal:
+    // Either "Login Authentication" or "Simulation Settings"
+    focusOnActiveTab() {
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and panes
+                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding pane
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    },
+
+    // fn to handle numeric input fields
+    // (Live Monitoring Modal > Simulation Settings)
+    // Changes the numbers as per click on + or - buttons 
+    handleNumericInput() {
+        document.querySelectorAll('.number-input').forEach(wrapper => {
+            const input = wrapper.querySelector('input');
+            const minusBtn = wrapper.querySelector('.minus');
+            const plusBtn = wrapper.querySelector('.plus');
+
+            minusBtn.addEventListener('click', () => {
+                const currentValue = parseInt(input.value);
+                const minValue = parseInt(input.min);
+                if (currentValue > minValue) {
+                    input.value = currentValue - 1;
+                }
+            });
+
+            plusBtn.addEventListener('click', () => {
+                const currentValue = parseInt(input.value);
+                const maxValue = parseInt(input.max);
+                if (currentValue < maxValue) {
+                    input.value = currentValue + 1;
+                }
+            });
+
+            // Validate minimum interval
+            if (input.id === 'interval') {
+                input.addEventListener('change', () => {
+                    if (parseInt(input.value) < 3) {
+                        input.value = 3;
+                    }
+                });
+            }
+
+            if (input.id === 'points') {
+                input.addEventListener('change', () => {
+                    if (parseInt(input.value) < input.min) {
+                        input.value = input.min;
+                    }
+                    if (parseInt(input.value) > input.max) {
+                        input.value = input.max;
+                    }
+                });
+            }
+        });
+    },
+
+
+    async handleAuth(event) {
         event.preventDefault();
         const formData = new FormData(event.target);
         const username = formData.get('username');
         const password = formData.get('password');
-
-        // TODO: Implement actual authentication
         console.warn('Authentication attempted:', { username });
-        this.hideModal();
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.status) {
+                this.hideModal();
+                this.startLiveMonitoring(isSimulated = false);
+            } else {
+                // Show error using alert modal
+                AlertModal.elements.title.textContent = 'Authentication Error';
+                AlertModal.elements.message.textContent = 'Invalid username or password';
+                AlertModal.elements.icon.src = 'static/img/i_error.png';
+                AlertModal.elements.modal.classList.remove('hidden');
+            }
+        } catch (error) {
+            AlertModal.elements.title.textContent = 'Connection Error';
+            AlertModal.elements.message.textContent = 'Failed to connect to server';
+            AlertModal.elements.icon.src = 'static/img/i_error.png';
+            AlertModal.elements.modal.classList.remove('hidden');
+        }
     },
 
-    startLiveMonitoring() {
+    handleSimulation(event) {
+        event.preventDefault();
+        const points = parseInt(AuthModal.elements.pointsInput.value);
+        const interval = parseInt(AuthModal.elements.intervalInput.value) * 1000;
+
+        this.update_interval = interval;
+        // Set global points_count
+        points_count = points;
+
+        this.hideModal();
+        this.startLiveMonitoring(isSimulated = true);
+    },
+
+    startLiveMonitoring(isSimulated = true) {
         if (this.active) return;
         this.active = true;
-        this.interval = setInterval(fetchAndPlotData, this.update_interval);
-        console.warn('Live monitoring started');
+
+        // Initial fetch
+        // fetchAndPlotData(false, isSimulated);
+        // Avoiding this as I want the fetch to be initiated EXPLICITLY only.
+
+        this.interval = setInterval(() => {
+            fetchAndPlotData(false, isSimulated);
+        }, this.update_interval);
+
+        console.warn('Live monitoring started:', isSimulated ? 'Simulation' : 'Real-time');
     },
 
     stopLiveMonitoring() {
@@ -707,23 +831,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize live monitoring
     LiveMonitoring.init();
 
-    // // Initialize alert system
-    // AlertSystem.init();
+    // Initialize alert system
+    AlertSystem.init();
 
-    // // Initialize charts
-    // ChartSystem.initCharts();
+    // Initialize charts
+    ChartSystem.initCharts();
 
-    // // Initialize optimized 2d, 3d plots
-    // PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
-    // PlotlyChartSystem.init2D('plot2_humidity', 'Humidity');
-    // PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality');
-    // PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature');
+    // Initialize optimized 2d, 3d plots
+    PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
+    PlotlyChartSystem.init2D('plot2_humidity', 'Humidity');
+    PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality');
+    PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature');
 
-    // PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
-    // PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
+    PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
+    PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
 
-    // // Initial data fetch
-    // fetchAndPlotData(isInitialFetch = true);
+    // Initial data fetch
+    fetchAndPlotData(isInitialFetch = true);
 
     // Start live monitoring (only for development)
     // LiveMonitoring.startLiveMonitoring();
@@ -741,69 +865,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ------------------------------------------------------------------------------
-// Play:
+// Play: 
+// FixMe: Just Trying it, hehe :)
 // ------------------------------------------------------------------------------
+
 // Dashboard:
 // updateReadings(temp = 25, hum = 50, aq = 200);
 // Charts:
 // ChartSystem.updateCharts(temp=25, feels=27, aqi=200);
 // Alerts:
 // AlertSystem.show(fire = true, gas = false);
-// Demo Live Monitoring: (create new fn, take starting point as parameter (count, def=0))
+// Demo Live Monitoring: 
+// points_count = 1300;
+// fetchAndPlotData(false, isSimulated = true);
+// or Use UI to start live monitoring in simulation mode (dataset has 1311 points)
+
 
 // ------------------------------------------------------------------------------
 // Temp Test:
 // ------------------------------------------------------------------------------
 
-// Tab Functionality
-document.querySelectorAll('.tab-item').forEach(tab => {
-    tab.addEventListener('click', () => {
-        // Remove active class from all tabs and panes
-        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-
-        // Add active class to clicked tab and corresponding pane
-        tab.classList.add('active');
-        document.getElementById(tab.dataset.tab).classList.add('active');
-    });
-});
-
-// Number Input Controls
-document.querySelectorAll('.number-input').forEach(wrapper => {
-    const input = wrapper.querySelector('input');
-    const minusBtn = wrapper.querySelector('.minus');
-    const plusBtn = wrapper.querySelector('.plus');
-
-    minusBtn.addEventListener('click', () => {
-        const currentValue = parseInt(input.value);
-        const minValue = parseInt(input.min);
-        if (currentValue > minValue) {
-            input.value = currentValue - 1;
-        }
-    });
-
-    plusBtn.addEventListener('click', () => {
-        const currentValue = parseInt(input.value);
-        input.value = currentValue + 1;
-    });
-
-    // Validate minimum interval
-    if (input.id === 'interval') {
-        input.addEventListener('change', () => {
-            if (parseInt(input.value) < 3) {
-                input.value = 3;
-            }
-        });
-    }
-});
-
-// Modal Close Functionality
-document.querySelectorAll('.close-modal').forEach(button => {
-    button.addEventListener('click', () => {
-        const modal = button.closest('.modal');
-        if (modal) {
-            modal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-    });
-});

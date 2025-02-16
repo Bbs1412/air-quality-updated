@@ -223,29 +223,6 @@
 
 
     <!-- Add the authentication modal, for real time data fetch -->
-    <!-- <div id="live-auth-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Authentication Required</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="auth-form">
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" name="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="auth-submit">Enable Live Monitoring</button>
-                </form>
-            </div>
-        </div>
-    </div> -->
-    
-    
     <div id="live-auth-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -287,7 +264,7 @@
                                 <label for="points">Initial Data Points</label>
                                 <div class="number-input">
                                     <button type="button" class="minus">-</button>
-                                    <input type="number" id="points" name="points" min="1" value="30">
+                                    <input type="number" id="points" name="points" min="1" value="30" max="1300">
                                     <button type="button" class="plus">+</button>
                                 </div>
                             </div>
