@@ -300,14 +300,14 @@ header h1 {
     color: var(--bg-gradient-1);
 }
 
-.plot2d{
+.plot2d {
     height: 400px;
     /* width: 100%; */
     border-radius: 0.5rem;
     overflow: hidden;
 }
 
-.plot3d{
+.plot3d {
     height: 600px;
     /* width: 100%; */
     border-radius: 0.5rem;
@@ -315,17 +315,18 @@ header h1 {
 }
 
 @media (max-width: 500px) {
+
     .plot2d,
     .plot3d {
         padding: 1rem;
-        overflow-x:hidden;
+        overflow-x: hidden;
     }
 
-    .plot3d{
+    .plot3d {
         height: 500px;
     }
 
-    .graph-header{
+    .graph-header {
         flex-direction: column;
         gap: 0.5rem;
     }
@@ -473,6 +474,7 @@ footer .copyright {
     z-index: 1000;
     width: 90%;
     max-width: 600px;
+
 }
 
 .alert-content {
@@ -632,9 +634,11 @@ footer .copyright {
 
 /* AQI - Gauge Chart Specific Styles */
 
-.gauge-container {
+.gauge-container,
+.temp-donut-container {
     /* Set height in media queries... */
     /* height: 50%; */
+    /* max-height: 20rem; */
     width: 100%;
     position: relative;
     display: flex;
@@ -644,21 +648,84 @@ footer .copyright {
 }
 
 .gauge-container canvas {
-    width: 100%;
+    width: 80%;
     height: 100%;
     display: block;
     margin: 0 auto;
 
     /* Since its semicircle, hence its plotted on only half of the canvas at bottom */
     /* Hence, Move it up by 50% in its parent container */
-    transform: translateY(-10%);
+    transform: translateY(-15%);
 }
 
-@media (max-width: 850px) {
-    .gauge-container {
-        height: 55%;
+.temp-donut-container canvas {
+    max-width: 35%;
+    /* height: 100%; */
+    display: block;
+    margin: 0 auto;
+    transform: translateY(-5%);
+}
+
+
+@media (max-width: 1200px) {
+
+    .gauge-container,
+    .temp-donut-container {
+        height: 70%;
+    }
+
+    .temp-donut-container canvas {
+        max-width: 45%;
     }
 }
+
+@media (max-width: 950px) {
+    .gauge-container{
+        margin-top: 5%;
+        height: 60%;
+    }
+
+    .gauge-container canvas {
+        width: 90%;
+    }
+
+    .temp-donut-container {
+        height: 60%;
+    }
+
+    .temp-donut-container canvas {
+        max-width: 80%;
+    }
+}
+
+@media (max-width: 750px) {
+    .gauge-container {
+        height: 50%;
+    }
+}
+
+@media (max-width: 660px) {
+    .gauge-container,
+    .temp-donut-container {
+        height: 60%;
+    }
+
+    .gauge-container canvas {
+        margin-bottom: 5%;
+    }
+}
+
+@media (max-width: 320px) {
+    .gauge-container,
+    .temp-donut-container {
+        height: 50%;
+    }
+
+    .gauge-container canvas {
+        margin-bottom: 5%;
+    }
+}
+
 
 /* Charts Labels Styling */
 .aqi-label,
@@ -724,11 +791,10 @@ footer .copyright {
 }
 
 
-/* Temperature Donut Chart Specific Styles */
+/* ------------------------------------------------------------------------------------ */
+/* Temp Test */
+/* ------------------------------------------------------------------------------------ */
 
-.temp-donut-container canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-    margin: 0 auto;
+.temp-test {
+    display: none;
 }

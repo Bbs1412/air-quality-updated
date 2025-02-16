@@ -52,7 +52,7 @@ async function fetchAndPlotData(isInitialFetch = false) {
         let data;
 
         if (isInitialFetch) {
-            const points_count = 20;
+            const points_count = 30;
             const response = await fetch(`/get_init_data/${points_count}`);
             data = await response.json();
         }
@@ -118,10 +118,17 @@ const AlertSystem = {
         Modal.elements.alert.innerHTML = alertContent;
         Modal.elements.alert.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+
+        const dashboard = document.querySelector('.dashboard');
+        dashboard.style.filter = 'blur(8px)';
+
         this.notifyUser(fire, gas);
     },
 
     hide() {
+        const dashboard = document.querySelector('.dashboard');
+        dashboard.style.filter = 'none';
+
         Modal.elements.alert.classList.add('hidden');
         document.body.style.overflow = 'auto';
     },
@@ -339,10 +346,10 @@ const ChartSystem = {
         const ctx = canvas.getContext('2d');
 
         // Fix pixel density for high-DPI displays
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = canvas.clientWidth * dpr;
-        canvas.height = canvas.clientHeight * dpr;
-        ctx.scale(dpr, dpr);
+        // const dpr = window.devicePixelRatio || 1;
+        // canvas.width = canvas.clientWidth * dpr;
+        // canvas.height = canvas.clientHeight * dpr;
+        // ctx.scale(dpr, dpr);
 
         this.tempChart = new Chart(ctx, {
             type: 'doughnut',
@@ -350,11 +357,13 @@ const ChartSystem = {
                 datasets: [
                     {
                         label: "Comfort Zones",
-                        data: [15, 20, 15],
+                        // 0-15 cold, 15-25 moderate, 25-35 hot, 35-50 extreme
+                        data: [15, 10, 10, 15],
                         backgroundColor: [
-                            "#48bb78",
-                            "#ed8936",
-                            "#f56565"
+                            "rgba(59, 130, 246, 1)",        // Cold zone - Blue
+                            "rgba(22, 163, 74, 1)",         // Moderate zone - Green
+                            "rgba(234, 179, 8, 1)",         // Hot zone - Yellow
+                            "rgba(220, 38, 38, 1)",         // Extreme zone - Red
                         ],
                         borderWidth: 0,
                         borderRadius: 2,
@@ -364,27 +373,31 @@ const ChartSystem = {
                         label: "Feels Like Temp",
                         data: [0, 50],
                         backgroundColor: [
-                            "#4facfe",
-                            'rgba(0, 0, 0, 0)'
+                            "rgba(147, 51, 234, 1)",        // Purple
+                            'rgba(79, 20, 140, 0.1)'
+                            // 'rgba(0, 0, 0, 0.18)'
                         ],
                         borderWidth: 0,
-                        borderRadius: 10,
+                        borderRadius: 5,
                         weight: 2
                     },
                     {
                         label: "Actual Temp",
                         data: [0, 50],
                         backgroundColor: [
-                            "#00f2fe",
-                            'rgba(0, 0, 0, 0)'
+                            "rgba(0, 188, 212, 1)",         // Cyan
+                            'rgba(0, 77, 102, 0.20)'
+                            // 'rgba(0, 0, 0, 0.45)'
                         ],
                         borderWidth: 0,
-                        borderRadius: 10,
+                        borderRadius: 5,
                         weight: 2.25
                     }
                 ]
             },
             options: {
+                limitMax: true,
+                limitMin: true,
                 responsive: true,
                 maintainAspectRatio: false,
                 cutout: '50%',
@@ -395,6 +408,18 @@ const ChartSystem = {
                     tooltip: {
                         callbacks: {
                             label: function (tooltipItem) {
+                                const zones = {
+                                    0: "Cold (0°C - 15°C)",
+                                    1: "Moderate (15°C - 25°C)",
+                                    2: "Hot (25°C - 35°C)",
+                                    3: "Extremely Hot (35°C - 50°C)"
+                                };
+
+                                // Display zone name for first dataset
+                                if (tooltipItem.datasetIndex === 0) {
+                                    return zones[tooltipItem.dataIndex];
+                                }
+                                // Display actual value for other datasets
                                 return `${tooltipItem.dataset.label}: ${tooltipItem.raw}°C`;
                             }
                         }
@@ -654,9 +679,6 @@ const PlotlyChartSystem = {
 };
 
 
-
-
-
 // ------------------------------------------------------------------------------
 // Initialization
 // ------------------------------------------------------------------------------
@@ -696,23 +718,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Start live monitoring (only for development)
     // LiveMonitoring.startLiveMonitoring();
 
-    // Copyright link
-    // const authorLink = document.querySelector('.author-link');
-    // if (authorLink) {
-    //     authorLink.addEventListener('click', (e) => {
-    //         e.preventDefault();
-    //         window.open('https://www.linkedin.com/in/bhushan-songire', '_blank');
-    //     });
-    // }
-
     // Resize = reload:
-    let resizeTimer;
-    window.addEventListener("resize", () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            location.reload();
-        }, 500);
-    });
+    // let resizeTimer;
+    // window.addEventListener("resize", () => {
+    //     clearTimeout(resizeTimer);
+    //     resizeTimer = setTimeout(() => {
+    //         location.reload();
+    //     }, 500);
+    // });
 
 });
 
