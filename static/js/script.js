@@ -52,7 +52,7 @@ async function fetchAndPlotData(isInitialFetch = false) {
         let data;
 
         if (isInitialFetch) {
-            const points_count = 2000;
+            const points_count = 20;
             const response = await fetch(`/get_init_data/${points_count}`);
             data = await response.json();
         }
@@ -91,26 +91,6 @@ async function fetchAndPlotData(isInitialFetch = false) {
 
         PlotlyChartSystem.update3D('plot3_temp_hum_feel', data.bs_temp, data.bs_hum, data.bs_feel);
         PlotlyChartSystem.update3D('plot3_feel_hum_aq', data.bs_feel, data.bs_hum, data.bs_mq135);
-
-        // // 2D Plots (plotData2 is new, plotData is old):
-        // plotData2('plot2_temperature', data.bs_temp, 'Temperature');
-        // plotData2('plot2_humidity', data.bs_hum, 'Humidity');
-        // plotData2('plot2_air_quality', data.bs_mq135, 'Air Quality');
-        // plotData2('plot2_feels_like', data.bs_feel, 'Feels Like Temperature');
-
-        // // 3D Plots
-        // plot3Dv2('plot3_temp_hum_feel',
-        //     data.bs_temp, data.bs_hum, data.bs_feel,
-        //     'Temperature', 'Humidity', 'Feels Like Temperature',
-        //     'Magma'
-        // );
-
-        // plot3Dv2('plot3_feel_hum_aq',
-        //     data.bs_feel, data.bs_hum, data.bs_mq135,
-        //     'Feels Like Temperature', 'Humidity', 'Air Quality',
-        //     'Electric'
-        // );
-
 
         // Check for emergencies
         AlertSystem.handleEmergency(data.bs_fire, data.bs_gas);
@@ -257,7 +237,6 @@ const LiveMonitoring = {
 // Chart Configurations (AQI and Temperature)
 // ------------------------------------------------------------------------------
 
-// Fixing chart consistency and implementing concentric circles for temperature analysis
 const ChartSystem = {
     gaugeChart: null,
     tempChart: null,
@@ -356,27 +335,71 @@ const ChartSystem = {
     },
 
     initTempChart() {
-        const ctx = document.getElementById('temp-donut').getContext('2d');
+        const canvas = document.getElementById('temp-donut');
+        const ctx = canvas.getContext('2d');
+
+        // Fix pixel density for high-DPI displays
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = canvas.clientWidth * dpr;
+        canvas.height = canvas.clientHeight * dpr;
+        ctx.scale(dpr, dpr);
+
         this.tempChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 datasets: [
                     {
-                        data: [30, 70],
-                        backgroundColor: ['rgba(0, 242, 254, 0.8)', 'rgba(0, 0, 0, 0)'],
-                        borderWidth: 0
+                        label: "Comfort Zones",
+                        data: [15, 20, 15],
+                        backgroundColor: [
+                            "#48bb78",
+                            "#ed8936",
+                            "#f56565"
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 2,
+                        weight: 1.75
                     },
                     {
-                        data: [70, 30],
-                        backgroundColor: ['rgba(79, 172, 254, 0.8)', 'rgba(0, 0, 0, 0)'],
-                        borderWidth: 0
+                        label: "Feels Like Temp",
+                        data: [0, 50],
+                        backgroundColor: [
+                            "#4facfe",
+                            'rgba(0, 0, 0, 0)'
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 10,
+                        weight: 2
+                    },
+                    {
+                        label: "Actual Temp",
+                        data: [0, 50],
+                        backgroundColor: [
+                            "#00f2fe",
+                            'rgba(0, 0, 0, 0)'
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 10,
+                        weight: 2.25
                     }
                 ]
             },
             options: {
-                ...this.commonChartOptions,
-                cutout: '80%',
-                plugins: { legend: { display: false } }
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '50%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (tooltipItem) {
+                                return `${tooltipItem.dataset.label}: ${tooltipItem.raw}°C`;
+                            }
+                        }
+                    }
+                }
             }
         });
     },
@@ -385,8 +408,11 @@ const ChartSystem = {
         this.gaugeChart.set(aqi);
         document.querySelector('.aqi-label').textContent = `AQI: ${aqi} (${this.getAQILevel(aqi)})`;
 
-        this.tempChart.data.datasets[0].data = [temp, 100 - temp];
-        this.tempChart.data.datasets[1].data = [feels, 100 - feels];
+        const maxTemp = 50;
+        const actualRatio = (temp / maxTemp) * 50;
+        const feelsLikeRatio = (feels / maxTemp) * 50;
+        this.tempChart.data.datasets[1].data = [feelsLikeRatio, 50 - feelsLikeRatio];
+        this.tempChart.data.datasets[2].data = [actualRatio, 50 - actualRatio];
         this.tempChart.update();
 
         document.querySelector('.temp-difference').textContent = `Actual: ${temp}°C | Feels Like: ${feels}°C`;
@@ -700,3 +726,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // ChartSystem.updateCharts(temp=25, feels=27, aqi=200);
 // Alerts:
 // AlertSystem.show(fire = true, gas = false);
+// Demo Live Monitoring: (create new fn, take starting point as parameter (count, def=0))
+
+// ------------------------------------------------------------------------------
+// Temp Test:
+// ------------------------------------------------------------------------------
+
