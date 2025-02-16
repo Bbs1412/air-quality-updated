@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App</title>
-    <link rel="icon" type="image/png" href="static/img/rainy-day.png">
 
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Weather App</title>
     <link rel="stylesheet" href="static/css/styles.css">
+    <link rel="icon" type="image/png" href="static/img/rainy-day.png">
 
     <meta property="og:title" content="Air Quality Monitoring System">
     <meta property="og:description" content="Website to Monitor and plot the readings of collected data from backend.">
@@ -20,6 +19,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://bernii.github.io/gauge.js/dist/gauge.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
@@ -28,8 +29,10 @@
     <div class="dashboard">
         <header>
             <h1>Environmental Analytics</h1>
-            <button id="live-monitor-btn" class="status-badge" data-modal-target="#live-auth-modal">
-                Live Monitoring
+
+            <button id="live-monitor-btn" class="control-btn">
+                <div class="live-indicator"></div>
+                <span>Live Monitoring</span>
             </button>
         </header>
 
@@ -239,7 +242,7 @@
                         <a href="#simulation">Simulation Settings</a>
                     </li>
                 </ul>
-    
+
                 <!-- Tab Content -->
                 <div class="tab-content">
                     <!-- Login Tab -->
@@ -256,7 +259,7 @@
                             <button type="submit" class="auth-submit">Enable Live Monitoring</button>
                         </form>
                     </div>
-    
+
                     <!-- Simulation Tab -->
                     <div id="simulation" class="tab-pane">
                         <form id="simulation-form">
@@ -283,13 +286,8 @@
             </div>
         </div>
     </div>
-    
-
-
 
     <script src="static/js/script.js"></script>
-    <!-- <script src="static/js/plot_2d.js"></script> -->
-    <!-- <script src="static/js/plot_3d.js"></script> -->
 </body>
 
 </html>

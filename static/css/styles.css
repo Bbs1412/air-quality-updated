@@ -58,7 +58,7 @@ header h1 {
     background-clip: text;
 }
 
-.status-badge {
+.control-btn {
     background: rgba(0, 242, 254, 0.1);
     border: 1px solid var(--accent-primary);
     color: var(--accent-primary);
@@ -73,14 +73,26 @@ header h1 {
     gap: 0.5rem;
 }
 
-.status-badge::before {
-    content: '';
+.control-btn:hover {
+    background: rgba(0, 242, 254, 0.2);
+    transform: translateY(-2px);
+}
+
+.control-btn.active {
+    background: var(--accent-secondary);
+    color: var(--bg-gradient-1);
+}
+
+.live-indicator {
     width: 8px;
     height: 8px;
     background-color: var(--accent-primary);
     border-radius: 50%;
-    display: inline-block;
     animation: pulse 2s infinite;
+}
+
+.control-btn.active .live-indicator {
+    background-color: var(--bg-gradient-1);
 }
 
 @keyframes pulse {
@@ -117,17 +129,30 @@ header h1 {
     }
 
     header {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
     }
 
     header h1 {
-        font-size: 2.0rem;
+        font-size: 2rem;
     }
 
-    .status-badge {
-        padding: 0.5rem 1rem;
-        font-size: 0.75rem;
+}
+
+@media (max-width: 640px) {
+    .control-btn span {
+        display: none;
+    }
+
+    .control-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 
@@ -140,9 +165,9 @@ header h1 {
         font-size: 1.75rem;
     }
 
-    .status-badge {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.625rem;
+    .control-btn {
+        width: 36px;
+        height: 36px;
     }
 }
 
@@ -601,58 +626,6 @@ footer .copyright {
     }
 
 }
-
-/* ------------------------------------------------------------------------------------ */
-/* Alert Modal */
-/* ------------------------------------------------------------------------------------ */
-
-/* #alert-modal .modal-content {
-    background: var(--bg-gradient-1);
-    border: 1px solid var(--danger);
-    max-width: 600px;
-}
-
-#alert-modal .modal-header {
-    border-bottom: 1px solid rgba(245, 101, 101, 0.2);
-}
-
-#alert-modal .alert-title {
-    color: var(--danger);
-}
-
-#alert-modal .alert-content {
-    padding: 2rem;
-    text-align: center;
-}
-
-#alert-modal .alert-icon {
-    width: 15rem;
-    height: auto;
-    margin-bottom: 1.5rem;
-}
-
-#alert-modal .alert-message {
-    color: var(--text-primary);
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-}
-
-#alert-modal .emergency-contacts {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-}
-
-#alert-modal .emergency-contacts button {
-    background: var(--danger);
-    color: var(--text-primary);
-    border: none;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-} */
-
 
 /* ------------------------------------------------------------------------------------ */
 /* Alert Modal */

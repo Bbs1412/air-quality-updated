@@ -39,11 +39,25 @@ const AlertModal = {
 // ------------------------------------------------------------------------------
 
 function updateReadings(temp, hum, aq) {
-    Dashboard.elements.temp.innerHTML = `${temp}°C`;
-    Dashboard.elements.hum.innerHTML = `${hum}%`;
-    // Dashboard.elements.aq.innerHTML = `${aq} ADC`;
-    Dashboard.elements.aq.innerHTML = `${aq}ppm`;
+    // Animate temperature
+    animateNumber('#dash_temp', temp, {
+        suffix: '°C',
+        duration: 500
+    });
 
+    // Animate humidity
+    animateNumber('#dash_hum', hum, {
+        suffix: '%',
+        duration: 500
+    });
+
+    // Animate air quality
+    animateNumber('#dash_aq', aq, {
+        suffix: 'ppm',
+        duration: 500
+    });
+
+    // Update timestamp
     const now = new Date();
     const hours = String(now.getHours() % 12 || 12).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -53,6 +67,48 @@ function updateReadings(temp, hum, aq) {
     Dashboard.elements.lastUpdated.innerHTML =
         `Data Last Updated - ${hours}:${minutes}:${seconds} ${period}`;
 }
+
+function animateNumber(element, number, options = {}) {
+    const $element = $(element);
+    const start = parseFloat($element.text()) || 0;
+    const suffix = options.suffix || '';
+
+    $element.prop('Counter', start).animate({
+        Counter: number
+    }, {
+        duration: options.duration || 400,
+        easing: 'swing',
+        step: function (now) {
+            const formatted = Number.isInteger(number) ?
+                Math.ceil(now) :
+                now.toFixed(1);
+            $(this).text(formatted + suffix);
+        },
+        complete: function () {
+            // Add a subtle scale animation at the end
+            $(this).css('transform', 'scale(1.1)');
+            setTimeout(() => {
+                $(this).css('transform', 'scale(1)');
+            }, 100);
+        }
+    });
+}
+
+// function updateReadings(temp, hum, aq) {
+//     Dashboard.elements.temp.innerHTML = `${temp}°C`;
+//     Dashboard.elements.hum.innerHTML = `${hum}%`;
+//     // Dashboard.elements.aq.innerHTML = `${aq} ADC`;
+//     Dashboard.elements.aq.innerHTML = `${aq}ppm`;
+
+//     const now = new Date();
+//     const hours = String(now.getHours() % 12 || 12).padStart(2, '0');
+//     const minutes = String(now.getMinutes()).padStart(2, '0');
+//     const seconds = String(now.getSeconds()).padStart(2, '0');
+//     const period = now.getHours() >= 12 ? 'PM' : 'AM';
+
+//     Dashboard.elements.lastUpdated.innerHTML =
+//         `Data Last Updated - ${hours}:${minutes}:${seconds} ${period}`;
+// }
 
 // ------------------------------------------------------------------------------
 // Data Fetching and Plotting
@@ -316,9 +372,9 @@ const LiveMonitoring = {
             });
 
             const data = await response.json();
+            this.hideModal();
 
             if (data.status) {
-                this.hideModal();
                 this.startLiveMonitoring(isSimulated = false);
             } else {
                 // Show error using alert modal
@@ -865,7 +921,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ------------------------------------------------------------------------------
-// Play: 
+// Play:
 // FixMe: Just Trying it, hehe :)
 // ------------------------------------------------------------------------------
 
@@ -875,7 +931,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ChartSystem.updateCharts(temp=25, feels=27, aqi=200);
 // Alerts:
 // AlertSystem.show(fire = true, gas = false);
-// Demo Live Monitoring: 
+// Demo Live Monitoring:
 // points_count = 1300;
 // fetchAndPlotData(false, isSimulated = true);
 // or Use UI to start live monitoring in simulation mode (dataset has 1311 points)
@@ -885,3 +941,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // Temp Test:
 // ------------------------------------------------------------------------------
 
+// ToDo:
+// 1. Turn the live monitoring into red color once started fetching
+// 2. Make into into button to stop the data fetch as soon as its re-clicked
