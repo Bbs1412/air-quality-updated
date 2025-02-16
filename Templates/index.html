@@ -191,26 +191,6 @@
     </div>
 
     <!-- Alert Modal -->
-    <!-- <div id="alert-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="alert-title">Emergency Alert</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body alert-content">
-                <img src="" alt="Emergency" class="alert-icon">
-                <p class="alert-message"></p>
-                <div class="emergency-contacts">
-                    <button onclick="window.location.href='tel:112'">Police: 112</button>
-                    <button onclick="window.location.href='tel:101'">Fire: 101</button>
-                    <button onclick="window.location.href='tel:102'">Ambulance: 102</button>
-                </div>
-            </div>
-        </div>
-    </div> -->
-
-
-    <!-- <button id="close-alert-modal" class="close-modal">&times;</button> -->
     <div id="alert-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -243,7 +223,7 @@
 
 
     <!-- Add the authentication modal, for real time data fetch -->
-    <div id="live-auth-modal" class="modal hidden">
+    <!-- <div id="live-auth-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Authentication Required</h2>
@@ -263,7 +243,72 @@
                 </form>
             </div>
         </div>
+    </div> -->
+    
+    
+    <div id="live-auth-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Live Monitoring Settings</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Tab Navigation -->
+                <ul class="nav-tabs">
+                    <li class="tab-item active" data-tab="login">
+                        <a href="#login">Login Authentication</a>
+                    </li>
+                    <li class="tab-item" data-tab="simulation">
+                        <a href="#simulation">Simulation Settings</a>
+                    </li>
+                </ul>
+    
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Login Tab -->
+                    <div id="login" class="tab-pane active">
+                        <form id="auth-form">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" id="username" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" id="password" name="password" required>
+                            </div>
+                            <button type="submit" class="auth-submit">Enable Live Monitoring</button>
+                        </form>
+                    </div>
+    
+                    <!-- Simulation Tab -->
+                    <div id="simulation" class="tab-pane">
+                        <form id="simulation-form">
+                            <div class="form-group">
+                                <label for="points">Initial Data Points</label>
+                                <div class="number-input">
+                                    <button type="button" class="minus">-</button>
+                                    <input type="number" id="points" name="points" min="1" value="30">
+                                    <button type="button" class="plus">+</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="interval">Fetch Interval (seconds)</label>
+                                <div class="number-input">
+                                    <button type="button" class="minus">-</button>
+                                    <input type="number" id="interval" name="interval" min="3" value="5">
+                                    <button type="button" class="plus">+</button>
+                                </div>
+                            </div>
+                            <button type="submit" class="auth-submit">Start Simulation</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    
+
+
 
     <script src="static/js/script.js"></script>
     <!-- <script src="static/js/plot_2d.js"></script> -->

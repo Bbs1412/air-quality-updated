@@ -57,23 +57,27 @@ function updateReadings(temp, hum, aq) {
 
 let points_count = 1;
 
-async function fetchAndPlotData(isInitialFetch = false) {
+async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
     try {
         let data;
 
+        // First data fetch (initial data, pre saved)
         if (isInitialFetch) {
             const points_count = 30;
             const response = await fetch(`/get_init_data/${points_count}`);
             data = await response.json();
         }
 
-        else {
-            // const response = await fetch('/get_data');
-            // data = await response.json();
-
-            // Simulate data fetch:
+        // Simulate data fetch (serial, pre saved)
+        else if (isSimulated) {
             points_count += 1;
             const response = await fetch(`/get_serial_data/${points_count}`);
+            data = await response.json();
+        }
+
+        // get data from firebase...
+        else {
+            const response = await fetch('/get_data');
             data = await response.json();
         }
 
@@ -703,23 +707,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize live monitoring
     LiveMonitoring.init();
 
-    // Initialize alert system
-    AlertSystem.init();
+    // // Initialize alert system
+    // AlertSystem.init();
 
-    // Initialize charts
-    ChartSystem.initCharts();
+    // // Initialize charts
+    // ChartSystem.initCharts();
 
-    // Initialize optimized 2d, 3d plots
-    PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
-    PlotlyChartSystem.init2D('plot2_humidity', 'Humidity');
-    PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality');
-    PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature');
+    // // Initialize optimized 2d, 3d plots
+    // PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
+    // PlotlyChartSystem.init2D('plot2_humidity', 'Humidity');
+    // PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality');
+    // PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature');
 
-    PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
-    PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
+    // PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
+    // PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
 
-    // Initial data fetch
-    fetchAndPlotData(isInitialFetch = true);
+    // // Initial data fetch
+    // fetchAndPlotData(isInitialFetch = true);
 
     // Start live monitoring (only for development)
     // LiveMonitoring.startLiveMonitoring();
@@ -751,3 +755,55 @@ document.addEventListener('DOMContentLoaded', () => {
 // Temp Test:
 // ------------------------------------------------------------------------------
 
+// Tab Functionality
+document.querySelectorAll('.tab-item').forEach(tab => {
+    tab.addEventListener('click', () => {
+        // Remove active class from all tabs and panes
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+        // Add active class to clicked tab and corresponding pane
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+});
+
+// Number Input Controls
+document.querySelectorAll('.number-input').forEach(wrapper => {
+    const input = wrapper.querySelector('input');
+    const minusBtn = wrapper.querySelector('.minus');
+    const plusBtn = wrapper.querySelector('.plus');
+
+    minusBtn.addEventListener('click', () => {
+        const currentValue = parseInt(input.value);
+        const minValue = parseInt(input.min);
+        if (currentValue > minValue) {
+            input.value = currentValue - 1;
+        }
+    });
+
+    plusBtn.addEventListener('click', () => {
+        const currentValue = parseInt(input.value);
+        input.value = currentValue + 1;
+    });
+
+    // Validate minimum interval
+    if (input.id === 'interval') {
+        input.addEventListener('change', () => {
+            if (parseInt(input.value) < 3) {
+                input.value = 3;
+            }
+        });
+    }
+});
+
+// Modal Close Functionality
+document.querySelectorAll('.close-modal').forEach(button => {
+    button.addEventListener('click', () => {
+        const modal = button.closest('.modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    });
+});
