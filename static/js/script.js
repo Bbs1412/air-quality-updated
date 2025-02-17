@@ -478,13 +478,12 @@ const ChartSystem = {
 
     getAQILevel(aqi) {
         const levels = {
-            'Good': { text: 'Good', color: '#48bb78' },
-            'Moderate': { text: 'Moderate', color: '#f6e05e' },
-            'Sensitive': { text: 'Sensitive', color: '#ed8936' },
-            // 'Sensitive': { text: 'Unhealthy for Sensitive Groups', color: '#ed8936' },
-            'Unhealthy': { text: 'Unhealthy', color: '#f56565' },
-            'Very Unhealthy': { text: 'Very Unhealthy', color: '#9f7aea' },
-            'Hazardous': { text: 'Hazardous', color: '#800000' }
+            'Good': { text: 'Good', color: 'rgba(72, 187, 120, 1)' },
+            'Moderate': { text: 'Moderate', color: 'rgba(246, 224, 94, 1)' },
+            'Sensitive': { text: 'Sensitive', color: 'rgba(237, 137, 54, 1)' },
+            'Unhealthy': { text: 'Unhealthy', color: 'rgba(245, 101, 101, 1)' },
+            'Very Unhealthy': { text: 'Very Unhealthy', color: 'rgba(159, 122, 234, 1)' },
+            'Hazardous': { text: 'Hazardous', color: 'rgba(128, 0, 0, 1)' }
         };
 
         let level;
@@ -496,8 +495,8 @@ const ChartSystem = {
         else level = levels['Hazardous'];
 
         const label = document.querySelector('.aqi-label');
-        label.style.backgroundColor = `${level.color}20`;
         label.style.color = level.color;
+        label.style.backgroundColor = `${level.color.slice(0, -2)}0.2)`;
         return level.text;
     },
 
@@ -514,41 +513,45 @@ const ChartSystem = {
             pointer: {
                 length: 0.5,
                 strokeWidth: 0.035,
-                color: '#00f2fe',
+                color: 'rgba(0, 242, 254, 1)',
                 iconPath: null
             },
             limitMax: true,
             limitMin: true,
-            colorStart: '#6FADCF',
-            colorStop: '#8FC0DA',
-            strokeColor: '#1a1f2c',
+            colorStart: 'rgba(111, 173, 207, 1)',
+            colorStop: 'rgba(143, 192, 218, 1)',
+            strokeColor: 'rgba(26, 31, 44, 1)',
             generateGradient: true,
             highDpiSupport: true,
             // Color gradient
-            percentColors: [[0.0, "#48bb78"], [0.50, "#f6e05e"], [1.0, "#f56565"]],
+            percentColors: [
+                [0.0, "rgba(72, 187, 120, 1)"],
+                [0.50, "rgba(246, 224, 94, 1)"],
+                [1.0, "rgba(245, 101, 101, 1)"]
+            ],
             staticLabels: {
                 font: "12px Inter",
                 labels: [0, 100, 200, 300, 400, 500],
-                color: "#a0aec0",
+                color: "rgba(160, 174, 192, 1)",
                 fractionDigits: 0
             },
             staticZones: [
-                { strokeStyle: "#48bb78", min: 0, max: 50 },
-                { strokeStyle: "#f6e05e", min: 51, max: 100 },
-                { strokeStyle: "#ed8936", min: 101, max: 150 },
-                { strokeStyle: "#f56565", min: 151, max: 200 },
-                { strokeStyle: "#9f7aea", min: 201, max: 300 },
-                { strokeStyle: "#800000", min: 301, max: 500 }
+                { strokeStyle: "rgba(72, 187, 120, 1)", min: 0, max: 50 },
+                { strokeStyle: "rgba(246, 224, 94, 1)", min: 51, max: 100 },
+                { strokeStyle: "rgba(237, 137, 54, 1)", min: 101, max: 150 },
+                { strokeStyle: "rgba(245, 101, 101, 1)", min: 151, max: 200 },
+                { strokeStyle: "rgba(159, 122, 234, 1)", min: 201, max: 300 },
+                { strokeStyle: "rgba(128, 0, 0, 1)", min: 301, max: 500 }
             ],
             // renderTicks: {
             //     divisions: 5,
             //     divWidth: 1.1,
             //     divLength: 0.7,
-            //     divColor: '#333333',
+            //     divColor: 'rgba(51, 51, 51, 1)',
             //     subDivisions: 3,
             //     subLength: 0.5,
             //     subWidth: 0.6,
-            //     subColor: '#666666'
+            //     subColor: 'rgba(102, 102, 102, 1)'
             // }
         });
 
@@ -718,28 +721,61 @@ const PlotlyChartSystem = {
     // ----------------------------------------------------------------
     // 2D Plot - New Optimized Method (plotData2)
     // ----------------------------------------------------------------
-    init2D(elementId, yLabel, useSecondaryFillColor = false) {
+    /**
+     * Do not set the top_range parameter unless 
+     * - you want to **STRICTLY** set both the `least` (baseline) and `maximum` (top_range) values. 
+     * - The **auto scaling** is `disabled` in that case.
+     */
+    init2D(elementId, yLabel, useSecondaryFillColor = false, baseline = 0, top_range = 100) {
         const trace = {
             x: this.generateTimeLabels(100),  // Initial dummy data
             y: new Array(100).fill(0),
             type: 'scatter',
             mode: 'lines',
             line: {
-                // color: '#00f2fe',
                 color: useSecondaryFillColor ? 'rgba(147, 51, 234, 1)' : 'rgba(0, 242, 254, 1)',
                 width: 3,
                 shape: 'spline'
             },
-            fill: 'tozeroy',
-            // fillcolor: 'rgba(0, 242, 254, 0.1)'
-            fillcolor: useSecondaryFillColor ? 'rgba(147, 51, 234, 0.1)' : 'rgba(0, 242, 254, 0.1)'
+            // fill: 'tozeroy',
+            fill: 'tonexty',
+            fillcolor: useSecondaryFillColor ? 'rgba(147, 51, 234, 0.1)' : 'rgba(0, 242, 254, 0.1)',
+            showlegend: false,
+            hoverinfo: 'y',
+            hoverlabel: {
+                bgcolor: 'rgba(0, 0, 0, 0.8)',
+                font: { color: 'rgba(0, 242, 254, 1)', size: 14 }
+            }
+        };
+
+        // Add baseline trace
+        const baselineTrace = {
+            x: this.generateTimeLabels(100),
+            y: new Array(100).fill(baseline),
+            type: 'scatter',
+            mode: 'lines',
+            line: {
+                color: 'rgba(0,0,0,0)',  // Invisible line
+                width: 0
+            },
+            showlegend: false,
+
+            // hoverinfo: 'none'
+            hoverinfo: 'x',
+            hoverlabel: {
+                bgcolor: 'rgba(0, 0, 0, 0.8)',
+                font: {
+                    color: 'rgba(160, 174, 192, 1)',
+                    size: 14
+                }
+            }
         };
 
         const layout = {
             plot_bgcolor: 'rgba(0,0,0,0)',
             paper_bgcolor: 'rgba(0,0,0,0)',
             font: {
-                color: '#a0aec0',
+                color: 'rgba(160, 174, 192, 1)',
                 family: 'Inter, sans-serif'
             },
             margin: {
@@ -747,33 +783,48 @@ const PlotlyChartSystem = {
                 t: 30, b: 50
             },
             xaxis: {
+                // title: 'Time',
                 showgrid: true,
                 gridcolor: 'rgba(255,255,255,0.1)',
-                tickformat: '%H:%M'
+                tickformat: '%H:%M',
+
+                // hoverformat: '%H:%M',  // Format for hover timestamp
+                // hoverlabel: {
+                //     bgcolor: 'rgba(0, 0, 0, 0.8)',
+                //     font: {
+                //         color: 'rgba(160, 174, 192, 1)',
+                //         size: 14
+                //     }
+                // }
             },
             yaxis: {
                 title: yLabel,
                 showgrid: true,
-                gridcolor: 'rgba(255,255,255,0.1)'
-            }
+                gridcolor: 'rgba(255,255,255,0.1)',
+                range: [baseline, top_range],
+                // If top range is default (at 100), then enable auto-ranging:
+                autorange: (top_range === 100)
+            },
         };
 
-        Plotly.newPlot(elementId, [trace], layout, {
+        Plotly.newPlot(elementId, [baselineTrace, trace], layout, {
             responsive: true,
             displayModeBar: false
         });
 
         // Store plot reference:
         this.plots[elementId] = {
-            data: trace, layout
+            data: [baselineTrace, trace],
+            layout
         };
     },
 
     update2D(elementId, data) {
         if (this.plots[elementId]) {
+            const timeLabels = this.generateTimeLabels(data.length);
             Plotly.update(elementId, {
-                y: [data],
-                x: [this.generateTimeLabels(data.length)]
+                x: [timeLabels, timeLabels],
+                y: [this.plots[elementId].data[0].y, data]
             });
         }
     },
@@ -781,7 +832,7 @@ const PlotlyChartSystem = {
     // ----------------------------------------------------------------
     // 2D - Steam Graph
     // ----------------------------------------------------------------
-    initSteamGraph(elementId, title = 'Temperature Analysis') {
+    initSteamGraph(elementId, ylabel) {
         const trace1 = {
             name: 'Actual Temperature',
             x: this.generateTimeLabels(100),  // Initial dummy data
@@ -789,7 +840,7 @@ const PlotlyChartSystem = {
             type: 'scatter',
             mode: 'lines',
             line: {
-                color: '#00f2fe',
+                color: 'rgba(0, 242, 254, 1)',
                 width: 3,
                 shape: 'spline'
             },
@@ -804,7 +855,7 @@ const PlotlyChartSystem = {
             type: 'scatter',
             mode: 'lines',
             line: {
-                color: '#9333ea',  // Purple color
+                color: 'rgba(147, 51, 234, 1)',  // Purple color
                 width: 3,
                 shape: 'spline'
             },
@@ -813,18 +864,18 @@ const PlotlyChartSystem = {
         };
 
         const layout = {
-            title: {
-                text: title,
-                font: {
-                    family: 'Inter, sans-serif',
-                    size: 20,
-                    color: '#a0aec0'
-                }
-            },
+            // title: {
+            //     text: title,
+            //     font: {
+            //         family: 'Inter, sans-serif',
+            //         size: 20,
+            //         color: 'rgba(160, 174, 192, 1)'
+            //     }
+            // },
             plot_bgcolor: 'rgba(0,0,0,0)',
             paper_bgcolor: 'rgba(0,0,0,0)',
             font: {
-                color: '#a0aec0',
+                color: 'rgba(160, 174, 192, 1)',
                 family: 'Inter, sans-serif'
             },
             margin: {
@@ -832,12 +883,13 @@ const PlotlyChartSystem = {
                 t: 50, b: 50
             },
             xaxis: {
+                // title: 'Time',
                 showgrid: true,
                 gridcolor: 'rgba(255,255,255,0.1)',
                 tickformat: '%H:%M'
             },
             yaxis: {
-                title: 'Temperature (°C)',
+                title: ylabel,
                 showgrid: true,
                 gridcolor: 'rgba(255,255,255,0.1)'
             },
@@ -1025,10 +1077,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Remember this is just initialization, you also need to "update" the plots with each data fetch from fetchAndPlotData()
 
     // PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
-    PlotlyChartSystem.initSteamGraph('plot2_temperature', 'Temperature');
-    PlotlyChartSystem.init2D('plot2_humidity', 'Humidity');
-    PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality');
-    PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature', false);
+    PlotlyChartSystem.initSteamGraph('plot2_temperature', 'Temperature (°C)');
+    PlotlyChartSystem.init2D('plot2_humidity', 'Humidity (%)');
+    PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality (ppm)');
+
+    PlotlyChartSystem.init2D(
+        elementId = 'plot2_feels_like', ylabel = 'Feels Like Temperature (°C)',
+        useSecondaryFillColor = false, baseline = 25);
 
     PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
     PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
@@ -1075,3 +1130,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // ToDo:
 // Add that STEAM GRAPH FOR Temperature
 
+PlotlyChartSystem.init2D()
