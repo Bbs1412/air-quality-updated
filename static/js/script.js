@@ -160,7 +160,8 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
         );
 
         // Update the plots:
-        PlotlyChartSystem.update2D('plot2_temperature', data.bs_temp);
+        // PlotlyChartSystem.update2D('plot2_temperature', data.bs_temp);
+        PlotlyChartSystem.updateSteamGraph('plot2_temperature', data.bs_temp, data.bs_feel);
         PlotlyChartSystem.update2D('plot2_humidity', data.bs_hum);
         PlotlyChartSystem.update2D('plot2_air_quality', data.bs_mq135);
         PlotlyChartSystem.update2D('plot2_feels_like', data.bs_feel);
@@ -392,9 +393,13 @@ const LiveMonitoring = {
             } else {
                 // Show error using alert modal
                 AlertModal.elements.title.textContent = 'Authentication Error';
-                AlertModal.elements.message.textContent = 'Invalid username or password';
+                AlertModal.elements.message.textContent = data.message;
                 AlertModal.elements.icon.src = 'static/img/i_error.png';
                 AlertModal.elements.modal.classList.remove('hidden');
+
+                // hide the emergency-contacts:
+                // document.querySelector('.emergency-contacts').style.display = 'none';
+                // This will hide them, but, need to figure out how to show them again in other cases (fire or gas) after one login attempt failed.
             }
         } catch (error) {
             AlertModal.elements.title.textContent = 'Connection Error';
@@ -412,8 +417,11 @@ const LiveMonitoring = {
         this.update_interval = interval;
         // Set global points_count
         points_count = points;
-
         this.hideModal();
+
+        // Raise one gas emergency, just for demo:
+        AlertSystem.show(fire = false, gas = true);
+
         this.startLiveMonitoring(isSimulated = true);
     },
 
@@ -710,19 +718,21 @@ const PlotlyChartSystem = {
     // ----------------------------------------------------------------
     // 2D Plot - New Optimized Method (plotData2)
     // ----------------------------------------------------------------
-    init2D(elementId, yLabel) {
+    init2D(elementId, yLabel, useSecondaryFillColor = false) {
         const trace = {
             x: this.generateTimeLabels(100),  // Initial dummy data
             y: new Array(100).fill(0),
             type: 'scatter',
             mode: 'lines',
             line: {
-                color: '#00f2fe',
+                // color: '#00f2fe',
+                color: useSecondaryFillColor ? 'rgba(147, 51, 234, 1)' : 'rgba(0, 242, 254, 1)',
                 width: 3,
                 shape: 'spline'
             },
             fill: 'tozeroy',
-            fillcolor: 'rgba(0, 242, 254, 0.1)'
+            // fillcolor: 'rgba(0, 242, 254, 0.1)'
+            fillcolor: useSecondaryFillColor ? 'rgba(147, 51, 234, 0.1)' : 'rgba(0, 242, 254, 0.1)'
         };
 
         const layout = {
@@ -764,6 +774,102 @@ const PlotlyChartSystem = {
             Plotly.update(elementId, {
                 y: [data],
                 x: [this.generateTimeLabels(data.length)]
+            });
+        }
+    },
+
+    // ----------------------------------------------------------------
+    // 2D - Steam Graph
+    // ----------------------------------------------------------------
+    initSteamGraph(elementId, title = 'Temperature Analysis') {
+        const trace1 = {
+            name: 'Actual Temperature',
+            x: this.generateTimeLabels(100),  // Initial dummy data
+            y: new Array(100).fill(0),
+            type: 'scatter',
+            mode: 'lines',
+            line: {
+                color: '#00f2fe',
+                width: 3,
+                shape: 'spline'
+            },
+            fill: 'tonexty',
+            fillcolor: 'rgba(0, 242, 254, 0.1)'
+        };
+
+        const trace2 = {
+            name: 'Feels Like',
+            x: this.generateTimeLabels(100),  // Initial dummy data
+            y: new Array(100).fill(0),
+            type: 'scatter',
+            mode: 'lines',
+            line: {
+                color: '#9333ea',  // Purple color
+                width: 3,
+                shape: 'spline'
+            },
+            fill: 'tonexty',
+            fillcolor: 'rgba(147, 51, 234, 0.1)'
+        };
+
+        const layout = {
+            title: {
+                text: title,
+                font: {
+                    family: 'Inter, sans-serif',
+                    size: 20,
+                    color: '#a0aec0'
+                }
+            },
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            font: {
+                color: '#a0aec0',
+                family: 'Inter, sans-serif'
+            },
+            margin: {
+                l: 50, r: 30,
+                t: 50, b: 50
+            },
+            xaxis: {
+                showgrid: true,
+                gridcolor: 'rgba(255,255,255,0.1)',
+                tickformat: '%H:%M'
+            },
+            yaxis: {
+                title: 'Temperature (°C)',
+                showgrid: true,
+                gridcolor: 'rgba(255,255,255,0.1)'
+            },
+            legend: {
+                orientation: 'h',
+                yanchor: 'bottom',
+                y: 1.02,
+                xanchor: 'right',
+                x: 1
+            }
+        };
+
+        Plotly.newPlot(elementId, [trace1, trace2], layout, {
+            responsive: true,
+            displayModeBar: false
+        });
+
+        // Store plot reference
+        this.plots[elementId] = {
+            data: [trace1, trace2],
+            layout
+        };
+    },
+
+    // Update Steam Graph
+    updateSteamGraph(elementId, actualTemp, feelsLikeTemp) {
+        if (this.plots[elementId]) {
+            const timeLabels = this.generateTimeLabels(actualTemp.length);
+
+            Plotly.update(elementId, {
+                x: [timeLabels, timeLabels],
+                y: [actualTemp, feelsLikeTemp]
             });
         }
     },
@@ -916,10 +1022,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ChartSystem.initCharts();
 
     // Initialize optimized 2d, 3d plots
-    PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
+    // Remember this is just initialization, you also need to "update" the plots with each data fetch from fetchAndPlotData()
+
+    // PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
+    PlotlyChartSystem.initSteamGraph('plot2_temperature', 'Temperature');
     PlotlyChartSystem.init2D('plot2_humidity', 'Humidity');
     PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality');
-    PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature');
+    PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature', false);
 
     PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
     PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
@@ -964,5 +1073,5 @@ document.addEventListener('DOMContentLoaded', () => {
 // ------------------------------------------------------------------------------
 
 // ToDo:
-// 1. Turn the live monitoring into red color once started fetching
-// 2. Make into into button to stop the data fetch as soon as its re-clicked
+// Add that STEAM GRAPH FOR Temperature
+
