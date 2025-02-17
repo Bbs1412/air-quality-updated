@@ -112,6 +112,36 @@ header h1 {
     }
 }
 
+.control-btn.monitoring-active {
+    background: rgba(245, 101, 101, 0.2);
+    /* border-color: #ffbf00; */
+    border-color: #ff6347;
+    /* color: #ffbf00; */
+    color: #ff6347;
+}
+
+.control-btn.monitoring-active .live-indicator {
+    /* background-color: #ffbf00; */
+    background-color: #ff6347;
+    animation: pulse-live 1s infinite;
+}
+
+@keyframes pulse-live {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(245, 101, 101, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(245, 101, 101, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(245, 101, 101, 0);
+    }
+}
+
+
 /* Media Queries */
 @media (max-width: 1200px) {
     .dashboard {

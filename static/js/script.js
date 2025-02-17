@@ -8,7 +8,10 @@ const Dashboard = {
         aq: document.getElementById('dash_aq'),
         hum: document.getElementById('dash_hum'),
         lastUpdated: document.getElementById('last_updated'),
-        copyright: document.querySelector('.copyright')
+        copyright: document.querySelector('.copyright'),
+        gaugeChartAQI: document.getElementById('aqi-gauge'),
+        donutChartTemp: document.getElementById('temp-donut'),
+        LiveMonitorBtn: document.getElementById('live-monitor-btn')
     }
 };
 
@@ -260,12 +263,13 @@ const AlertSystem = {
 const LiveMonitoring = {
     active: false,
     interval: null,
+    liveBtn: Dashboard.elements.LiveMonitorBtn,
     update_interval: 5 * 1000,  // x seconds
 
     init() {
         // Control "Live Monitoring" button
-        const liveBtn = document.getElementById('live-monitor-btn');
-        liveBtn.addEventListener('click', () => this.showModal());
+        // const liveBtn = Dashboard.elements.LiveMonitorBtn;
+        this.liveBtn.addEventListener('click', () => this.handleButtonClick());
 
         this.focusOnActiveTab();
         this.handleNumericInput();
@@ -276,6 +280,15 @@ const LiveMonitoring = {
 
         AuthModal.elements.liveAuth.classList.add('hidden');
         AuthModal.elements.closeBtn.addEventListener('click', () => this.hideModal());
+    },
+
+    handleButtonClick() {
+        if (this.active) {
+            this.stopLiveMonitoring();
+            // this.hideModal();
+        } else {
+            this.showModal();
+        }
     },
 
     showModal() {
@@ -408,6 +421,10 @@ const LiveMonitoring = {
         if (this.active) return;
         this.active = true;
 
+        // Update button appearance
+        this.liveBtn.classList.add('monitoring-active');
+        this.liveBtn.querySelector('span').textContent = 'Stop Live Mode';
+
         // Initial fetch
         // fetchAndPlotData(false, isSimulated);
         // Avoiding this as I want the fetch to be initiated EXPLICITLY only.
@@ -422,6 +439,11 @@ const LiveMonitoring = {
     stopLiveMonitoring() {
         if (!this.active) return;
         this.active = false;
+
+        // Reset button appearance
+        this.liveBtn.classList.remove('monitoring-active');
+        this.liveBtn.querySelector('span').textContent = 'Live Monitoring';
+
         clearInterval(this.interval);
         console.warn('Live monitoring stopped');
     }
@@ -472,7 +494,7 @@ const ChartSystem = {
     },
 
     initGaugeChart() {
-        const target = document.getElementById('aqi-gauge');
+        const target = Dashboard.elements.gaugeChartAQI;
         this.gaugeChart = new Gauge(target);
         this.gaugeChart.setOptions({
             // Update the translate -30 in css to move the gauge up/down
@@ -529,7 +551,7 @@ const ChartSystem = {
     },
 
     initTempChart() {
-        const canvas = document.getElementById('temp-donut');
+        const canvas = Dashboard.elements.donutChartTemp;
         const ctx = canvas.getContext('2d');
 
         // Fix pixel density for high-DPI displays
