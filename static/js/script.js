@@ -37,6 +37,13 @@ const AlertModal = {
     }
 };
 
+// Set this number to a value which will always be greater than the number of points that will be actually received in a single fetch.
+const largeInitPoints = 1500;
+
+// Actual number of points to fetch in FIRST FETCH (init data)
+let initPointsCount = 30;
+// const initPointsCount = 1200;
+
 // ------------------------------------------------------------------------------
 // Dashboard Updates
 // ------------------------------------------------------------------------------
@@ -125,7 +132,7 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
 
         // First data fetch (initial data, pre saved)
         if (isInitialFetch) {
-            const init_points_count = 30;
+            const init_points_count = initPointsCount;
             const response = await fetch(`/get_init_data/${init_points_count}`);
             data = await response.json();
         }
@@ -727,31 +734,12 @@ const PlotlyChartSystem = {
      * - The **auto scaling** is `disabled` in that case.
      */
     init2D(elementId, yLabel, useSecondaryFillColor = false, baseline = 0, top_range = 100) {
-        const trace = {
-            x: this.generateTimeLabels(100),  // Initial dummy data
-            y: new Array(100).fill(0),
-            type: 'scatter',
-            mode: 'lines',
-            line: {
-                color: useSecondaryFillColor ? 'rgba(147, 51, 234, 1)' : 'rgba(0, 242, 254, 1)',
-                width: 3,
-                shape: 'spline'
-            },
-            // fill: 'tozeroy',
-            fill: 'tonexty',
-            fillcolor: useSecondaryFillColor ? 'rgba(147, 51, 234, 0.1)' : 'rgba(0, 242, 254, 0.1)',
-            showlegend: false,
-            hoverinfo: 'y',
-            hoverlabel: {
-                bgcolor: 'rgba(0, 0, 0, 0.8)',
-                font: { color: 'rgba(0, 242, 254, 1)', size: 14 }
-            }
-        };
-
         // Add baseline trace
         const baselineTrace = {
-            x: this.generateTimeLabels(100),
-            y: new Array(100).fill(baseline),
+            name: 'hidden baseline',
+            // Init with real large number of points, otherwise you will see graphs as shown in "../../docs/Error.png"
+            x: this.generateTimeLabels(largeInitPoints),
+            y: new Array(largeInitPoints).fill(baseline),
             type: 'scatter',
             mode: 'lines',
             line: {
@@ -764,10 +752,29 @@ const PlotlyChartSystem = {
             hoverinfo: 'x',
             hoverlabel: {
                 bgcolor: 'rgba(0, 0, 0, 0.8)',
-                font: {
-                    color: 'rgba(160, 174, 192, 1)',
-                    size: 14
-                }
+                font: { color: 'rgba(160, 174, 192, 1)', size: 30 }
+            }
+        };
+
+        const trace = {
+            name: yLabel,
+            x: this.generateTimeLabels(largeInitPoints),  // Initial dummy data
+            y: new Array(largeInitPoints).fill(0),
+            type: 'scatter',
+            mode: 'lines',
+            line: {
+                color: useSecondaryFillColor ? 'rgba(147, 51, 234, 1)' : 'rgba(0, 242, 254, 1)',
+                width: 3,
+                shape: 'spline'
+            },
+            // fill: 'tozeroy',
+            fill: 'tonexty',
+            fillcolor: useSecondaryFillColor ? 'rgba(147, 51, 234, 0.1)' : 'rgba(0, 242, 254, 0.1)',
+            showlegend: false,
+            // hoverinfo: 'y',    // If you set this, idk why the label on x-axis will move from bottom anchor to right anchor.
+            hoverlabel: {
+                bgcolor: 'rgba(0, 0, 0, 0.8)',
+                font: { color: 'rgba(0, 242, 254, 1)', size: 14 }
             }
         };
 
@@ -788,7 +795,7 @@ const PlotlyChartSystem = {
                 gridcolor: 'rgba(255,255,255,0.1)',
                 tickformat: '%H:%M',
 
-                // hoverformat: '%H:%M',  // Format for hover timestamp
+                hoverformat: '%H:%M',  // Format for hover timestamp
                 // hoverlabel: {
                 //     bgcolor: 'rgba(0, 0, 0, 0.8)',
                 //     font: {
@@ -835,8 +842,8 @@ const PlotlyChartSystem = {
     initSteamGraph(elementId, ylabel, baseline = 0, top_range = 100) {
         const baselineTrace = {
             name: 'hidden baseline',
-            x: this.generateTimeLabels(100),
-            y: new Array(100).fill(baseline),
+            x: this.generateTimeLabels(largeInitPoints),
+            y: new Array(largeInitPoints).fill(baseline),
             type: 'scatter',
             mode: 'lines',
             line: {
@@ -856,8 +863,8 @@ const PlotlyChartSystem = {
 
         const trace1 = {
             name: 'Actual Temperature',
-            x: this.generateTimeLabels(100),  // Initial dummy data
-            y: new Array(100).fill(baseline),
+            x: this.generateTimeLabels(largeInitPoints),  // Initial dummy data
+            y: new Array(largeInitPoints).fill(baseline),
             type: 'scatter',
             mode: 'lines',
             line: {
@@ -871,8 +878,8 @@ const PlotlyChartSystem = {
 
         const trace2 = {
             name: 'Feels Like',
-            x: this.generateTimeLabels(100),  // Initial dummy data
-            y: new Array(100).fill(baseline),
+            x: this.generateTimeLabels(largeInitPoints),  // Initial dummy data
+            y: new Array(largeInitPoints).fill(baseline),
             type: 'scatter',
             mode: 'lines',
             line: {
@@ -1103,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Remember this is just initialization, you also need to "update" the plots with each data fetch from fetchAndPlotData()
 
     PlotlyChartSystem.initSteamGraph(
-        elementId = 'plot2_temperature', ylabel = 'Temperature (°C)', 
+        elementId = 'plot2_temperature', ylabel = 'Temperature (°C)',
         baseline = 25, top_range = 40);
 
     // PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
@@ -1142,21 +1149,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Dashboard:
 // updateReadings(temp = 25, hum = 50, aq = 200);
+
 // Charts:
 // ChartSystem.updateCharts(temp=25, feels=27, aqi=200);
+
 // Alerts:
 // AlertSystem.show(fire = true, gas = false);
+
 // Demo Live Monitoring:
 // points_count = 1300;
 // fetchAndPlotData(false, isSimulated = true);
 // or Use UI to start live monitoring in simulation mode (dataset has 1311 points)
 
+// Fetch with some specific init points:
+// Console: initPointCount = 1000;
+// fetchAndPlotData(isInitialFetch = true);
 
 // ------------------------------------------------------------------------------
 // Temp Test:
 // ------------------------------------------------------------------------------
-
-// ToDo:
-// Add that STEAM GRAPH FOR Temperature
-
-PlotlyChartSystem.init2D()
