@@ -832,11 +832,32 @@ const PlotlyChartSystem = {
     // ----------------------------------------------------------------
     // 2D - Steam Graph
     // ----------------------------------------------------------------
-    initSteamGraph(elementId, ylabel) {
+    initSteamGraph(elementId, ylabel, baseline = 0, top_range = 100) {
+        const baselineTrace = {
+            name: 'hidden baseline',
+            x: this.generateTimeLabels(100),
+            y: new Array(100).fill(baseline),
+            type: 'scatter',
+            mode: 'lines',
+            line: {
+                color: 'rgba(0,0,0,0)',  // Invisible line
+                width: 0
+            },
+            showlegend: false,
+            hoverinfo: 'x',
+            hoverlabel: {
+                bgcolor: 'rgba(0, 0, 0, 0.8)',
+                font: {
+                    color: 'rgba(160, 174, 192, 1)',
+                    size: 14
+                }
+            }
+        };
+
         const trace1 = {
             name: 'Actual Temperature',
             x: this.generateTimeLabels(100),  // Initial dummy data
-            y: new Array(100).fill(0),
+            y: new Array(100).fill(baseline),
             type: 'scatter',
             mode: 'lines',
             line: {
@@ -851,7 +872,7 @@ const PlotlyChartSystem = {
         const trace2 = {
             name: 'Feels Like',
             x: this.generateTimeLabels(100),  // Initial dummy data
-            y: new Array(100).fill(0),
+            y: new Array(100).fill(baseline),
             type: 'scatter',
             mode: 'lines',
             line: {
@@ -891,7 +912,12 @@ const PlotlyChartSystem = {
             yaxis: {
                 title: ylabel,
                 showgrid: true,
-                gridcolor: 'rgba(255,255,255,0.1)'
+                gridcolor: 'rgba(255,255,255,0.1)',
+
+                range: [baseline, top_range],
+                // If top range is default (at 100), then enable auto-ranging:
+                autorange: (top_range === 100),
+                // autorange: false
             },
             legend: {
                 orientation: 'h',
@@ -909,7 +935,7 @@ const PlotlyChartSystem = {
 
         // Store plot reference
         this.plots[elementId] = {
-            data: [trace1, trace2],
+            data: [baselineTrace, trace1, trace2],
             layout
         };
     },
@@ -1076,8 +1102,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize optimized 2d, 3d plots
     // Remember this is just initialization, you also need to "update" the plots with each data fetch from fetchAndPlotData()
 
+    PlotlyChartSystem.initSteamGraph(
+        elementId = 'plot2_temperature', ylabel = 'Temperature (°C)', 
+        baseline = 25, top_range = 40);
+
     // PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
-    PlotlyChartSystem.initSteamGraph('plot2_temperature', 'Temperature (°C)');
     PlotlyChartSystem.init2D('plot2_humidity', 'Humidity (%)');
     PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality (ppm)');
 
