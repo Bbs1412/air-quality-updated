@@ -146,8 +146,69 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
 
         // get data from firebase...
         else {
-            const response = await fetch('/get_data');
-            data = await response.json();
+            try {
+                const response = await fetch('/get_live_data');
+                resp = await response.json();
+
+                if (response.status === 200) {
+                    // Data fetched successfully
+                    // data = resp.message;
+                    data = PreProcessor.getProcessedResponse(resp.message);
+                }
+
+                else if (response.status === 403) {
+                    // Unauthorized data case:
+                    if (resp.error === "Unauthorized to access data") {
+                        AlertSystem.showCustomAlert(
+                            title = 'Authorization Error',
+                            message = 'You need to be logged in to access this data.',
+                            icon = "static/img/police.png",
+                            notify = false
+                        );
+                    }
+
+                    // Any other 403 case:
+                    else {
+                        AlertSystem.showCustomAlert(
+                            title = 'Data Fetch Error',
+                            message = resp.error || 'Failed to fetch data from server.'
+                        );
+                    }
+                    return;
+                }
+
+                else if (response.status === 429) {
+                    // Handle rate-limited error (too many requests)
+                    AlertSystem.showCustomAlert(
+                        title = 'Rate Limit Exceeded',
+                        message = resp.error || 'You have made too many requests.',
+                        icon = "static/img/police.png",
+                        notify = false
+                    );
+                    // Stop the live monitoring
+                    LiveMonitoring.stopLiveMonitoring();
+                    return;
+                }
+
+                else {
+                    // Handle unknown errors
+                    AlertSystem.showCustomAlert(
+                        title = 'Unknown Error',
+                        message = 'An unexpected error occurred. Please try again later.'
+                    );
+                    return;
+                }
+            }
+
+            catch (error) {
+                console.error('Data Error:', error);
+
+                AlertSystem.showCustomAlert(title = 'Data Related Error',
+                    message = 'Failed to fetch or process data from server')
+
+                updateReadings('--', '--', '---');
+                return;
+            }
         }
 
         console.log('Data fetched: ', data.bs_temp.length);
@@ -180,8 +241,9 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
         AlertSystem.handleEmergency(data.bs_fire, data.bs_gas);
         // console.log('Emergency:', data.bs_fire, data.bs_gas);
     } catch (error) {
-        console.error('Data fetch failed:', error);
+        console.error('Data Error:', error);
         updateReadings('--', '--', '---');
+        AlertSystem.showCustomAlert(title = 'Data Error', message = 'Failed to plot data');
     }
 }
 
@@ -261,6 +323,37 @@ const AlertSystem = {
             icon: 'static/img/favicon.png'
             // icon: 'static/img/i_emergency.png'
         });
+    },
+
+    // Dedicated custom Alert:
+    /**
+    * Show a custom alert modal with a title, message, and icon.
+    * - Notification title and message can be skipped
+    * - They default to the title and message of the alert (if unspecified)
+    */
+    showCustomAlert(
+        title = "Forgot to add Title :)",
+        message = "Stay happy in life 😇",
+        icon = "static/img/i_error.png",
+        notify = false, notificationTitle = '', notificationMessage = '') {
+        AlertModal.elements.title.textContent = title;
+        AlertModal.elements.message.textContent = message;
+        AlertModal.elements.icon.src = icon;
+
+        // Show modal:
+        AlertModal.elements.modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // Handle notification if requested
+        if (notify && ("Notification" in window) && Notification.permission === "granted") {
+            new Notification(
+                notificationTitle || title,
+                {
+                    body: notificationMessage || message,
+                    icon: 'static/img/favicon.png'
+                }
+            );
+        }
     }
 };
 
@@ -392,27 +485,45 @@ const LiveMonitoring = {
                 body: JSON.stringify({ username, password })
             });
 
-            const data = await response.json();
             this.hideModal();
+            // console.log(response);
+            const resp = await response.json();
 
-            if (data.status) {
+            if (response.status === 200) {
                 this.startLiveMonitoring(isSimulated = false);
-            } else {
-                // Show error using alert modal
-                AlertModal.elements.title.textContent = 'Authentication Error';
-                AlertModal.elements.message.textContent = data.message;
-                AlertModal.elements.icon.src = 'static/img/i_error.png';
-                AlertModal.elements.modal.classList.remove('hidden');
-
-                // hide the emergency-contacts:
-                // document.querySelector('.emergency-contacts').style.display = 'none';
-                // This will hide them, but, need to figure out how to show them again in other cases (fire or gas) after one login attempt failed.
             }
-        } catch (error) {
-            AlertModal.elements.title.textContent = 'Connection Error';
-            AlertModal.elements.message.textContent = 'Failed to connect to server';
-            AlertModal.elements.icon.src = 'static/img/i_error.png';
-            AlertModal.elements.modal.classList.remove('hidden');
+            else if (response.status === 403) {
+                AlertSystem.showCustomAlert(
+                    title = 'Login Failed',
+                    message = resp.error || 'Invalid Email or Password entered.',
+                );
+            }
+            else if (response.status === 429) {
+                AlertSystem.showCustomAlert(
+                    title = 'Access Denied',
+                    message = resp.error,
+                    icon = "static/img/police.png",
+                    notify = true
+                );
+            }
+            else {
+                AlertSystem.showCustomAlert(
+                    title = 'Authentication Error',
+                    message = 'Authentication failed, please try again.',
+                    notify = false,
+                )
+            }
+        }
+        catch (error) {
+            console.error(error);
+            AlertSystem.showCustomAlert(
+                title = 'Unexpected Error',
+                message = error,
+            );
+
+            // hide the emergency-contacts:
+            // document.querySelector('.emergency-contacts').style.display = 'none';
+            // This will hide them, but, need to figure out how to show them again in other cases (fire or gas) after one login attempt failed.
         }
     },
 
@@ -1143,8 +1254,100 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ------------------------------------------------------------------------------
+// FB-Live response pre-processor:
+// ------------------------------------------------------------------------------
+
+const PreProcessor = {
+    // Validate individual reading
+    isValidReading(reading) {
+        return typeof reading === "object" &&
+            !isNaN(reading.temp) &&
+            !isNaN(reading.hum) &&
+            !isNaN(reading.feel) &&
+            !isNaN(reading.mq135) &&
+            !isNaN(reading.mq4);
+    },
+
+    // Get default readings when no valid data is available
+    getDefaultReadings() {
+        return {
+            temp: 33,
+            hum: 67,
+            feel: 36,
+            mq135: 130,
+            mq4: 153
+        };
+    },
+
+    // Extract readings from current data point
+    extractReadings(reading, lastValidReading = null) {
+        if (this.isValidReading(reading)) {
+            return reading;
+        }
+        return lastValidReading || this.getDefaultReadings();
+    },
+
+    // Initialize arrays for storing processed data
+    initializeDataArrays() {
+        return {
+            bs_temp: [],
+            bs_hum: [],
+            bs_feel: [],
+            bs_mq135: [],
+            bs_mq4: [],
+            bs_keys: []
+        };
+    },
+
+    // Process node data and update arrays
+    processNodeData(response_node, dataArrays) {
+        let lastValidReading = null;
+
+        for (const key in response_node) {
+            if (key !== "fire_node" && key !== "gas_node") {
+                dataArrays.bs_keys.push(key);
+
+                const reading = this.extractReadings(response_node[key], lastValidReading);
+
+                // Update arrays with readings
+                dataArrays.bs_temp.push(reading.temp);
+                dataArrays.bs_hum.push(reading.hum);
+                dataArrays.bs_feel.push(reading.feel);
+                dataArrays.bs_mq135.push(reading.mq135);
+                dataArrays.bs_mq4.push(reading.mq4);
+
+                // Update last valid reading if current reading is valid
+                if (this.isValidReading(response_node[key])) {
+                    lastValidReading = response_node[key];
+                }
+            }
+        }
+        return dataArrays;
+    },
+
+    // Driver function that orchestrates the preprocessing
+    getProcessedResponse(response_node) {
+        // Initialize data arrays
+        const dataArrays = this.initializeDataArrays();
+
+        // Process the node data
+        const processedArrays = this.processNodeData(response_node, dataArrays);
+
+        // Return final processed response
+        return {
+            ...processedArrays,
+            bs_gas: response_node["gas_node"],
+            bs_fire: response_node["fire_node"],
+            total_length: processedArrays.bs_temp.length
+        };
+    }
+};
+
+
+
+// ------------------------------------------------------------------------------
 // Play:
-// FixMe: Just Trying it, hehe :)
+// FixMe: Just Trying it, heHe :)
 // ------------------------------------------------------------------------------
 
 // Dashboard:
