@@ -19,10 +19,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://bernii.github.io/gauge.js/dist/gauge.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <!-- External Libraries (Added 'defer') -->
+    <script defer src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script defer src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script defer src="https://bernii.github.io/gauge.js/dist/gauge.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -287,7 +288,34 @@
         </div>
     </div>
 
-    <script src="static/js/script.js"></script>
+    <script defer src="static/js/script.js" onload="initializeApp()"></script>
+
+    <script>
+        function initializeApp() {
+            let missingScripts = [];
+
+            if (typeof jQuery === "undefined") {
+                missingScripts.push("jQuery (Realtime dashboard updated may not work)");
+            }
+            if (typeof Chart === "undefined") {
+                missingScripts.push("Chart.js (AQI Plots may not work)");
+            }
+            if (typeof Gauge === "undefined") {
+                missingScripts.push("Gauge.js (Temperature analysis may not work)");
+            }
+            if (typeof Plotly === "undefined") {
+                missingScripts.push("Plotly.js (Multiple plots on page may not work)");
+            }
+
+            if (missingScripts.length > 0) {
+                // Alert the user about missing scripts
+                alert("⚠️ Some features might not work properly:\n\n" + missingScripts.join("\n"));
+            } else {
+                // Log success if all scripts are loaded
+                console.info("✅ All scripts loaded successfully. Starting page rendering...");
+            }
+        }
+    </script>
 </body>
 
 </html>
