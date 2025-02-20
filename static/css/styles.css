@@ -441,8 +441,11 @@ footer .copyright {
     left: 0;
     right: 0;
     bottom: 0;
+    /* background: rgba(26, 31, 44, 0.9); */
+    /* Disable to avoid heavy GPU usage */
     background: rgba(26, 31, 44, 0.8);
     backdrop-filter: blur(8px);
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -664,6 +667,8 @@ footer .copyright {
 #alert-modal {
     position: fixed;
     inset: 0;
+    /* background: rgba(26, 31, 44, 0.9); */
+    /* Disabled to avoid heavy GPU usage */
     background: rgba(26, 31, 44, 0.9);
     backdrop-filter: blur(10px);
     z-index: 1000;
