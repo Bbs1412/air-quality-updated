@@ -203,9 +203,8 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
             catch (error) {
                 console.error('Data Error:', error);
 
-                AlertSystem.showCustomAlert(title = 'Data Related Error',
-                    message = 'Failed to fetch or process data from server')
-
+                // AlertSystem.showCustomAlert(title = 'Data Related Error', message = 'Failed to fetch or process data from server');
+                AlertSystem.showCustomAlert('Data Related Error', 'Failed to fetch or process data from server', undefined, false, undefined, undefined);
                 updateReadings('--', '--', '---');
                 return;
             }
@@ -243,7 +242,8 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
     } catch (error) {
         console.error('Data Error:', error);
         updateReadings('--', '--', '---');
-        AlertSystem.showCustomAlert(title = 'Data Error', message = 'Failed to plot data');
+        // AlertSystem.showCustomAlert(title = 'Data Error', message = 'Failed to plot data');
+        AlertSystem.showCustomAlert('Data Error', 'Failed to plot data', undefined, false, undefined, undefined);
     }
 }
 
@@ -490,36 +490,41 @@ const LiveMonitoring = {
             const resp = await response.json();
 
             if (response.status === 200) {
-                this.startLiveMonitoring(isSimulated = false);
+                // this.startLiveMonitoring(isSimulated = false);
+                this.startLiveMonitoring(false);
             }
             else if (response.status === 403) {
-                AlertSystem.showCustomAlert(
-                    title = 'Login Failed',
-                    message = resp.error || 'Invalid Email or Password entered.',
-                );
+                // AlertSystem.showCustomAlert(
+                //     title = 'Login Failed',
+                //     message = resp.error || 'Invalid Email or Password entered.',
+                // );
+                AlertSystem.showCustomAlert('Login Failed', resp.error || 'Invalid Email or Password entered.', undefined, false, undefined, undefined);
             }
             else if (response.status === 429) {
-                AlertSystem.showCustomAlert(
-                    title = 'Access Denied',
-                    message = resp.error,
-                    icon = "static/img/police.png",
-                    notify = true
-                );
+                // AlertSystem.showCustomAlert(
+                //     title = 'Access Denied',
+                //     message = resp.error,
+                //     icon = "static/img/police.png",
+                //     notify = true
+                // );
+                AlertSystem.showCustomAlert('Access Denied', resp.error, 'static/img/police.png', true, undefined, undefined);
             }
             else {
-                AlertSystem.showCustomAlert(
-                    title = 'Authentication Error',
-                    message = 'Authentication failed, please try again.',
-                    notify = false,
-                )
+                // AlertSystem.showCustomAlert(
+                //     title = 'Authentication Error',
+                //     message = 'Authentication failed, please try again.',
+                //     notify = false,
+                // )
+                AlertSystem.showCustomAlert('Authentication Error', 'Authentication failed, please try again.', undefined, false, undefined, undefined);
             }
         }
         catch (error) {
             console.error(error);
-            AlertSystem.showCustomAlert(
-                title = 'Unexpected Error',
-                message = error,
-            );
+            // AlertSystem.showCustomAlert(
+            //     title = 'Unexpected Error',
+            //     message = error,
+            // );
+            AlertSystem.showCustomAlert('Unexpected Error', error, undefined, false, undefined, undefined);
 
             // hide the emergency-contacts:
             // document.querySelector('.emergency-contacts').style.display = 'none';
@@ -538,9 +543,11 @@ const LiveMonitoring = {
         this.hideModal();
 
         // Raise one gas emergency, just for demo:
-        AlertSystem.show(fire = false, gas = true);
+        // AlertSystem.show(fire = false, gas = true);
+        AlertSystem.show(false, true);
 
-        this.startLiveMonitoring(isSimulated = true);
+        // this.startLiveMonitoring(isSimulated = true);
+        this.startLiveMonitoring(true);
     },
 
     startLiveMonitoring(isSimulated = true) {
@@ -1204,6 +1211,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             else {
                 console.warn("Notification permission denied");
+                window.alert("Please allow notifications to receive alerts.");
             }
         });
     }
@@ -1220,23 +1228,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize optimized 2d, 3d plots
     // Remember this is just initialization, you also need to "update" the plots with each data fetch from fetchAndPlotData()
 
-    PlotlyChartSystem.initSteamGraph(
-        elementId = 'plot2_temperature', ylabel = 'Temperature (°C)',
-        baseline = 25, top_range = 40);
-
-    // PlotlyChartSystem.init2D('plot2_temperature', 'Temperature');
-    PlotlyChartSystem.init2D('plot2_humidity', 'Humidity (%)');
-    PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality (ppm)');
-
-    PlotlyChartSystem.init2D(
-        elementId = 'plot2_feels_like', ylabel = 'Feels Like Temperature (°C)',
-        useSecondaryFillColor = false, baseline = 25);
+    PlotlyChartSystem.initSteamGraph('plot2_temperature', 'Temperature (°C)', 25, 40);
+    
+    PlotlyChartSystem.init2D('plot2_humidity', 'Humidity (%)', false, undefined, undefined);
+    PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality (ppm)', false, undefined, undefined);
+    PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature (°C)', false, 25, undefined);
 
     PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
     PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
 
     // Initial data fetch
-    fetchAndPlotData(isInitialFetch = true);
+    // fetchAndPlotData(isInitialFetch = true);
+    fetchAndPlotData(true, undefined);
 
     // Start live monitoring (only for development)
     // LiveMonitoring.startLiveMonitoring();
@@ -1361,7 +1364,7 @@ const PreProcessor = {
 
 // Demo Live Monitoring:
 // points_count = 1300;
-// fetchAndPlotData(false, isSimulated = true);
+// fetchAndPlotData(isInitialFetch = false, isSimulated = true);
 // or Use UI to start live monitoring in simulation mode (dataset has 1311 points)
 
 // Fetch with some specific init points:
@@ -1371,3 +1374,5 @@ const PreProcessor = {
 // ------------------------------------------------------------------------------
 // Temp Test:
 // ------------------------------------------------------------------------------
+
+// ToDO: Implement that css thing to avoid excessive GPU utilization 
