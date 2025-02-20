@@ -148,7 +148,7 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
         else {
             try {
                 const response = await fetch('/get_live_data');
-                resp = await response.json();
+                let resp = await response.json();
 
                 if (response.status === 200) {
                     // Data fetched successfully
@@ -159,32 +159,36 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
                 else if (response.status === 403) {
                     // Unauthorized data case:
                     if (resp.error === "Unauthorized to access data") {
-                        AlertSystem.showCustomAlert(
-                            title = 'Authorization Error',
-                            message = 'You need to be logged in to access this data.',
-                            icon = "static/img/police.png",
-                            notify = false
-                        );
+                        // AlertSystem.showCustomAlert(
+                        //     title = 'Authorization Error',
+                        //     message = 'You need to be logged in to access this data.',
+                        //     icon = "static/img/police.png",
+                        //     notify = false
+                        // );
+                        AlertSystem.showCustomAlert('Authorization Error', 'You need to be logged in to access this data.', 'static/img/police.png', false, undefined, undefined);
+
                     }
 
                     // Any other 403 case:
                     else {
-                        AlertSystem.showCustomAlert(
-                            title = 'Data Fetch Error',
-                            message = resp.error || 'Failed to fetch data from server.'
-                        );
+                        // AlertSystem.showCustomAlert(
+                        //     title = 'Data Fetch Error',
+                        //     message = resp.error || 'Failed to fetch data from server.'
+                        // );
+                        AlertSystem.showCustomAlert('Data Fetch Error', resp.error || 'Failed to fetch data from server.', undefined, false, undefined, undefined);
                     }
                     return;
                 }
 
                 else if (response.status === 429) {
                     // Handle rate-limited error (too many requests)
-                    AlertSystem.showCustomAlert(
-                        title = 'Rate Limit Exceeded',
-                        message = resp.error || 'You have made too many requests.',
-                        icon = "static/img/police.png",
-                        notify = false
-                    );
+                    // AlertSystem.showCustomAlert(
+                    //     title = 'Rate Limit Exceeded',
+                    //     message = resp.error || 'You have made too many requests.',
+                    //     icon = "static/img/police.png",
+                    //     notify = false
+                    // );
+                    AlertSystem.showCustomAlert('Rate Limit Exceeded', resp.error || 'You have made too many requests.', 'static/img/police.png', false, undefined, undefined);
                     // Stop the live monitoring
                     LiveMonitoring.stopLiveMonitoring();
                     return;
@@ -192,11 +196,12 @@ async function fetchAndPlotData(isInitialFetch = false, isSimulated = true) {
 
                 else {
                     // Handle unknown errors
-                    AlertSystem.showCustomAlert(
-                        title = 'Unknown Error',
-                        message = 'An unexpected error occurred. Please try again later.'
-                    );
-                    return;
+                    // AlertSystem.showCustomAlert(
+                    //     title = 'Unknown Error',
+                    //     message = 'An unexpected error occurred. Please try again later.'
+                    // );
+                    AlertSystem.showCustomAlert('Unknown Error', 'An unexpected error occurred. Please try again later.', undefined, false, undefined, undefined);
+                    // return;
                 }
             }
 
@@ -1229,7 +1234,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Remember this is just initialization, you also need to "update" the plots with each data fetch from fetchAndPlotData()
 
     PlotlyChartSystem.initSteamGraph('plot2_temperature', 'Temperature (°C)', 25, 40);
-    
+
     PlotlyChartSystem.init2D('plot2_humidity', 'Humidity (%)', false, undefined, undefined);
     PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality (ppm)', false, undefined, undefined);
     PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature (°C)', false, 25, undefined);
