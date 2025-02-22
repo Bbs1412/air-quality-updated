@@ -1242,6 +1242,10 @@ document.addEventListener('DOMContentLoaded', () => {
     PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
     PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
 
+    // Update the readings to 0, so that on first fetch animation will work:
+    // (from html, initialized as ---, and on that, animation does not work)
+    updateReadings(0, 0, 0);
+
     // Initial data fetch
     // fetchAndPlotData(isInitialFetch = true);
     fetchAndPlotData(true, undefined);
