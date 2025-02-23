@@ -359,6 +359,62 @@ const AlertSystem = {
                 }
             );
         }
+    },
+
+    /**
+     * Displays a toast-like message on the page.
+     *
+     * @param {string} message The message to display.
+     * @param {string} type  'success', 'info', 'warning', or 'error'.
+     * @param {number} duration  Time in seconds. Default is 3s.
+     */
+    showToastMessage(message, type = 'info', duration = 3) {
+        let toastContainer = document.querySelector('.toast-container');
+
+        // Create a single toast container if not present
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.classList.add('toast-container');
+            document.body.appendChild(toastContainer);
+        }
+
+        const toastMessage = document.createElement('div');
+        toastMessage.classList.add('toast-message', `toast-${type}`);
+        toastMessage.textContent = message;
+
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.classList.add('toast-close-button');
+        closeButton.innerHTML = '&times;';  // Use '×' symbol for close
+        toastMessage.appendChild(closeButton);
+
+        // Create progress bar element
+        const progressBar = document.createElement('div');
+        progressBar.classList.add('toast-progress-bar');
+        toastMessage.appendChild(progressBar);
+
+        toastContainer.appendChild(toastMessage); // Append to container
+
+        // Force reflow before starting animation (fixes instant animation issue)
+        requestAnimationFrame(() => {
+            toastMessage.classList.add('show');
+            progressBar.style.width = '100%';  // Start full
+            progressBar.style.transition = `width ${duration * 1000}ms linear`;  // Animate shrinking
+            progressBar.style.width = '0%';  // Shrink progress bar
+        });
+
+        // Remove toast after duration
+        const timeoutId = setTimeout(() => {
+            toastMessage.classList.remove('show');
+            toastMessage.addEventListener('transitionend', () => toastMessage.remove(), { once: true });
+        }, duration * 1000);
+
+        // Close button functionality
+        closeButton.addEventListener('click', () => {
+            clearTimeout(timeoutId);
+            toastMessage.classList.remove('show');
+            toastMessage.addEventListener('transitionend', () => toastMessage.remove(), { once: true });
+        });
     }
 };
 
@@ -1203,69 +1259,6 @@ const PlotlyChartSystem = {
 
 
 // ------------------------------------------------------------------------------
-// Initialization
-// ------------------------------------------------------------------------------
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    // Request notification permissions
-    if ("Notification" in window) {
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                console.info("Notification permission granted");
-            }
-            else {
-                console.warn("Notification permission denied");
-                window.alert("Please allow notifications to receive alerts.");
-            }
-        });
-    }
-
-    // Initialize live monitoring
-    LiveMonitoring.init();
-
-    // Initialize alert system
-    AlertSystem.init();
-
-    // Initialize charts
-    ChartSystem.initCharts();
-
-    // Initialize optimized 2d, 3d plots
-    // Remember this is just initialization, you also need to "update" the plots with each data fetch from fetchAndPlotData()
-
-    PlotlyChartSystem.initSteamGraph('plot2_temperature', 'Temperature (°C)', 25, 40);
-
-    PlotlyChartSystem.init2D('plot2_humidity', 'Humidity (%)', false, undefined, undefined);
-    PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality (ppm)', false, undefined, undefined);
-    PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature (°C)', false, 25, undefined);
-
-    PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
-    PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
-
-    // Update the readings to 0, so that on first fetch animation will work:
-    // (from html, initialized as ---, and on that, animation does not work)
-    updateReadings(0, 0, 0);
-
-    // Initial data fetch
-    // fetchAndPlotData(isInitialFetch = true);
-    fetchAndPlotData(true, undefined);
-
-    // Start live monitoring (only for development)
-    // LiveMonitoring.startLiveMonitoring();
-
-    // Resize = reload:
-    // let resizeTimer;
-    // window.addEventListener("resize", () => {
-    //     clearTimeout(resizeTimer);
-    //     resizeTimer = setTimeout(() => {
-    //         location.reload();
-    //     }, 500);
-    // });
-
-});
-
-
-// ------------------------------------------------------------------------------
 // FB-Live response pre-processor:
 // ------------------------------------------------------------------------------
 
@@ -1356,6 +1349,84 @@ const PreProcessor = {
 };
 
 
+// ------------------------------------------------------------------------------
+// Initialization
+// ------------------------------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Request notification permissions
+    if ("Notification" in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                console.info("Notification permission granted");
+            }
+            else {
+                console.warn("Notification permission denied");
+                // window.alert("Please allow notifications to receive alerts.");
+
+                // Un comment below line to show a toast message for notification permission:
+                // AlertSystem.showToastMessage("Please allow notifications to receive emergency alerts.", "warn", 5);
+            }
+        });
+    }
+
+    // Initialize live monitoring
+    LiveMonitoring.init();
+
+    // Initialize alert system
+    AlertSystem.init();
+
+    // Initialize charts
+    ChartSystem.initCharts();
+
+    // Initialize optimized 2d, 3d plots
+    // Remember this is just initialization, you also need to "update" the plots with each data fetch from fetchAndPlotData()
+
+    PlotlyChartSystem.initSteamGraph('plot2_temperature', 'Temperature (°C)', 25, 40);
+
+    PlotlyChartSystem.init2D('plot2_humidity', 'Humidity (%)', false, undefined, undefined);
+    PlotlyChartSystem.init2D('plot2_air_quality', 'Air Quality (ppm)', false, undefined, undefined);
+    PlotlyChartSystem.init2D('plot2_feels_like', 'Feels Like Temperature (°C)', false, 25, undefined);
+
+    PlotlyChartSystem.init3D('plot3_temp_hum_feel', 'Temperature', 'Humidity', 'Feels Like Temperature', 'Magma');
+    PlotlyChartSystem.init3D('plot3_feel_hum_aq', 'Feels Like Temperature', 'Humidity', 'Air Quality', 'Electric');
+
+    // Update the readings to 0, so that on first fetch animation will work:
+    // (from html, initialized as ---, and on that, animation does not work)
+    updateReadings(0, 0, 0);
+
+    // Initial data fetch
+    // fetchAndPlotData(isInitialFetch = true);
+    fetchAndPlotData(true, undefined);
+
+    // Start live monitoring (only for development)
+    // LiveMonitoring.startLiveMonitoring();
+
+    // Resize = reload:
+    // let resizeTimer;
+    // window.addEventListener("resize", () => {
+    //     clearTimeout(resizeTimer);
+    //     resizeTimer = setTimeout(() => {
+    //         location.reload();
+    //     }, 500);
+    // });
+
+    // Show a warning toast for 5 seconds
+    // AlertSystem.showToastMessage("Temperature is getting high!", "success", 5);
+    // Show a success toast for 3 seconds
+    // AlertSystem.showToastMessage("Toast coded successfully.", "success");
+
+    // Welcome message:
+    AlertSystem.showToastMessage('Welcome!', 'success', 2);
+
+    // Show a warning toast for small screens:
+    if (window.innerWidth < 700) {
+        AlertSystem.showToastMessage("For the best experience, please view the dashboard on a laptop or wider display.", "info", 8);
+    }
+
+});
+
 
 // ------------------------------------------------------------------------------
 // Play:
@@ -1379,6 +1450,13 @@ const PreProcessor = {
 // Fetch with some specific init points:
 // Console: initPointCount = 1000;
 // fetchAndPlotData(isInitialFetch = true);
+
+// Toast:
+// AlertSystem.showToastMessage("Error! Something went wrong.", "error");
+// AlertSystem.showToastMessage("Warning! Temperature is getting high.", "warn");
+// AlertSystem.showToastMessage("Info! Everything is fine.", "info");
+// AlertSystem.showToastMessage("Success! Data fetched successfully.", "success");
+
 
 // ------------------------------------------------------------------------------
 // Temp Test:
